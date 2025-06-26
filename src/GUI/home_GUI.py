@@ -107,7 +107,6 @@ class MediaDownloaderPro(QWidget):
         layout.addWidget(logo_container)
         layout.addStretch()
 
-    # ...existing code...
         # Botão minimizar (amarelo)
         btn_min = QPushButton("")
         btn_min.setFixedSize(10, 10)
@@ -155,7 +154,6 @@ class MediaDownloaderPro(QWidget):
         """)
         btn_close.clicked.connect(self.close)
         layout.addWidget(btn_close)
-    # ...existing code...
 
         # Permitir mover a janela
         bar.mousePressEvent = self.title_bar_mouse_press

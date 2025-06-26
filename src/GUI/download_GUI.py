@@ -6,24 +6,25 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from pytubefix import YouTube
 from src.core.youtube_downloader import baixar_video_audio_mesclar, baixar_audio, baixar_thumbnail
+from src.GUI.custom_title_bar import CustomTitleBar
 
 
-
-class VideoDownloaderWidget(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self, video_url=None):
         super().__init__()
-        self.yt = None
-        self.video_streams = []
-        self.audio_streams = []
-        self.video_url = video_url
-        self.output_folder = ""  # <-- Adicione esta linha antes de chamar init_ui
-        self.init_ui()
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setValue(0)
-        self.progress_bar.setVisible(False)  # Só mostra durante o download
-        self.layout.addWidget(self.progress_bar)
-        if self.video_url:
-            self.load_video_info(self.video_url)
+        self.setWindowTitle("Video Downloader")
+        self.setFixedSize(500, 405)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        # Barra personalizada
+        self.title_bar = CustomTitleBar(self, on_close=self.close, on_min=self.showMinimized, on_max=self.toggle_max_restore)
+        central_widget = QWidget()
+        layout = QVBoxLayout(central_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.title_bar)
+        # Widget principal
+        self.downloader_widget = VideoDownloaderWidget(video_url)
+        layout.addWidget(self.downloader_widget)
+        self.setCentralWidget(central_widget)
     
     def init_ui(self):
         self.layout = QVBoxLayout(self)
