@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QGridLayout,QTableWidget, QTableWidgetItem, QHeaderView, 
     QProgressBar,QAbstractItemView
 )
-from PySide6.QtGui import QIcon, QPixmap, QMouseEvent
+from PySide6.QtGui import QIcon, QPixmap, QMouseEvent,QGuiApplication
 from PySide6.QtCore import Qt
 from pytablericons import TablerIcons, OutlineIcon, FilledIcon
 import sys
@@ -30,6 +30,12 @@ class MediaDownloaderPro(QWidget):
                 font-weight: 500;
                 margin-bottom: 0px;
             }
+            
+            QTabWidget::pane {
+            border: none;
+            background-color: #f5f5f5;
+     }
+
             QLineEdit {
                 padding: 8px;
                 border: 1px solid #cccccc;
@@ -180,38 +186,336 @@ class MediaDownloaderPro(QWidget):
     def setup_ui(self):
         layout = self.body_layout
 
-        # Tabs
+        # Tabs (apenas Home e Settings)
         self.tabs = QTabWidget()
         self.tabs.addTab(self.create_home_tab(), "Home")
-        self.tabs.addTab(self.create_settings_tab(), "Account Settings")
-        self.tabs.addTab(self.create_history_tab(), "History")  # <-- Adiciona a aba de histórico
+        self.tabs.addTab(self.create_settings_tab(), "Settings")
         layout.addWidget(self.tabs)
+        
+        # Painel de histórico retrátil na parte inferior
+        self.history_panel = self.create_history_panel()
+        layout.addWidget(self.history_panel)
+
+    def create_history_panel(self):
+        # Container principal do painel
+        panel_container = QWidget()
+        panel_layout = QVBoxLayout(panel_container)
+        panel_layout.setContentsMargins(0, 0, 0, 0)
+        panel_layout.setSpacing(0)
+        
+        # Barra superior com título e botão de toggle
+        header_bar = QWidget()
+        header_bar.setFixedHeight(40)
+        header_bar.setStyleSheet("""
+            QWidget {
+                background-color: #008080;
+                border-top-left-radius: 10px;
+                border-top-right-radius: 10px;
+            }
+        """)
+        header_layout = QHBoxLayout(header_bar)
+        header_layout.setContentsMargins(15, 0, 15, 0)
+        
+        # Título "History"
+        history_title = QLabel("History")
+        history_title.setStyleSheet("""
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        """)
+        header_layout.addWidget(history_title)
+        header_layout.addStretch()
+        
+        # Botão de toggle (setinha)
+        self.toggle_btn = QPushButton("▲")
+        self.toggle_btn.setFixedSize(30, 30)
+        self.toggle_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                border: none;
+                color: white;
+                font-size: 16px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+            }
+        """)
+        self.toggle_btn.clicked.connect(self.toggle_history)
+        header_layout.addWidget(self.toggle_btn)
+        
+        # Conteúdo do histórico (aumentado para 300px)
+        self.history_content = self.create_history_content()
+        self.history_content.setFixedHeight(300)  # Aumentado de 200 para 300
+        
+        # Adicionar ao layout
+        panel_layout.addWidget(header_bar)
+        panel_layout.addWidget(self.history_content)
+        
+        return panel_container
+
+    def create_history_content(self):
+        content_widget = QWidget()
+        content_widget.setStyleSheet("""
+            QWidget {
+                background-color: white;
+                border-bottom-left-radius: 10px;
+                border-bottom-right-radius: 10px;
+            }
+        """)
+        layout = QVBoxLayout(content_widget)
+        layout.setContentsMargins(20, 15, 20, 15)
+        layout.setSpacing(10)
+
+        # Container com scroll para os cards
+        from PySide6.QtWidgets import QScrollArea
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background: transparent;
+            }
+            QScrollBar:vertical {
+                background: #f0f0f0;
+                width: 8px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #cccccc;
+                border-radius: 4px;
+            }
+        """)
+
+        # Widget interno do scroll
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setSpacing(10)
+        scroll_layout.setContentsMargins(0, 0, 10, 0)
+
+        # Criar cards de exemplo
+        example_files = [
+            {
+                "title": "asdasdasdasdasdasd",
+                "format": "MP4 - 1080P",
+                "time": "01:00",
+                "size": "450Mb"
+            },
+            {
+                "title": "Another Video File",
+                "format": "MP3 - 320kbps",
+                "time": "03:45",
+                "size": "8.5Mb"
+            },
+            {
+                "title": "Tutorial Video",
+                "format": "MP4 - 720P",
+                "time": "12:30",
+                "size": "256Mb"
+            }
+        ]
+
+        for file_data in example_files:
+            card = self.create_file_card(file_data)
+            scroll_layout.addWidget(card)
+
+        scroll_layout.addStretch()
+        scroll_area.setWidget(scroll_widget)
+        layout.addWidget(scroll_area)
+
+        return content_widget
+
+    def create_file_card(self, file_data):
+        """Cria um card individual para cada arquivo"""
+        card = QWidget()
+        card.setFixedHeight(80)
+        card.setStyleSheet("""
+            QWidget {
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                border: 1px solid #e9ecef;
+            }
+            QWidget:hover {
+                background-color: #e9ecef;
+            }
+        """)
+        
+        layout = QHBoxLayout(card)
+        layout.setContentsMargins(15, 10, 15, 10)
+        layout.setSpacing(15)
+
+        # Ícone de play
+        play_icon = QLabel()
+        play_icon.setFixedSize(50, 50)
+        play_icon.setStyleSheet("""
+            QLabel {
+                background-color: #6c757d;
+                border-radius: 25px;
+                color: white;
+                font-size: 20px;
+            }
+        """)
+        play_icon.setAlignment(Qt.AlignCenter)
+        play_icon.setText("▶")
+        layout.addWidget(play_icon)
+
+        # Informações do arquivo
+        info_layout = QVBoxLayout()
+        info_layout.setSpacing(2)
+
+        # Título
+        title_label = QLabel(file_data["title"])
+        title_label.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: #212529;
+            }
+        """)
+        
+        # Formato e detalhes
+        details_label = QLabel(f"{file_data['format']} • Time: {file_data['time']} • Size: {file_data['size']}")
+        details_label.setStyleSheet("""
+            QLabel {
+                font-size: 12px;
+                color: #6c757d;
+            }
+        """)
+
+        info_layout.addWidget(title_label)
+        info_layout.addWidget(details_label)
+        info_layout.addStretch()
+
+        layout.addLayout(info_layout)
+        layout.addStretch()
+
+        # Botão de deletar
+        delete_btn = QPushButton("🗑️")
+        delete_btn.setFixedSize(30, 30)
+        delete_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                border: none;
+                font-size: 16px;
+                border-radius: 15px;
+            }
+            QPushButton:hover {
+                background-color: #dc3545;
+                color: white;
+            }
+        """)
+        layout.addWidget(delete_btn)
+
+        return card
+
+    def toggle_history(self):
+        if self.history_content.isVisible():
+            self.history_content.hide()
+            self.toggle_btn.setText("▼")
+        else:
+            self.history_content.show()
+            self.toggle_btn.setText("▲")
+
+    def toggle_history(self):
+        if self.history_content.isVisible():
+            self.history_content.hide()
+            self.toggle_btn.setText("▼")
+        else:
+            self.history_content.show()
+            self.toggle_btn.setText("▲")
 
     def create_home_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(18)
 
-        # Label
-        label = QLabel("Paste the media link")
-        layout.addWidget(label)
+        # Container central
+        central_container = QWidget()
+        central_layout = QVBoxLayout(central_container)
+        central_layout.setSpacing(15)
+        
+        # Label do texto
+        label = QLabel("Click and paste the link here")
+        label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                color: #666;
+                margin-top: 10px;
+            }
+        """)
+        
+        # Botão Paste Here com ícone
+        paste_btn = QPushButton()
+        paste_btn.setFixedSize(150, 40)
 
-        # Input + Button
-        input_row = QHBoxLayout()
-        input_row.setSpacing(12)
-        self.link_input = QLineEdit()
-        self.link_input.setPlaceholderText("https://www.youtube.com/watch?v=...")
-        detect_button = QPushButton("Detect")
-        detect_button.setFixedHeight(38)
-        detect_button.clicked.connect(self.detect_clicked)
+        # Layout horizontal para o conteúdo do botão
+        btn_content = QHBoxLayout()
+        btn_content.setContentsMargins(10, 0, 10, 0)
+        btn_content.setSpacing(8)
 
-        input_row.addWidget(self.link_input)
-        input_row.addWidget(detect_button)
-        layout.addLayout(input_row)
+        # Ícone no botão
+        icon_label = QLabel()
+        icon_pixmap = QPixmap("images/icons/paste_icon.png")  # Substitua pelo caminho do seu ícone
+        icon_label.setPixmap(icon_pixmap.scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setStyleSheet("background: transparent;")
 
-        layout.addStretch()
+        # Texto do botão
+        text_label = QLabel("Paste Here")
+        text_label.setStyleSheet("color: white; background: transparent; font-weight: 500;")
+
+        # Adiciona ícone e texto ao layout do botão
+        btn_content.addStretch()
+        btn_content.addWidget(icon_label)
+        btn_content.addWidget(text_label)
+        btn_content.addStretch()
+
+        # Widget container para o conteúdo do botão
+        btn_container = QWidget()
+        btn_container.setLayout(btn_content)
+        paste_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #008080;
+                border: none;
+                border-radius: 7px;
+            }
+            QPushButton:hover {
+                background-color: #006666;
+            }
+        """)
+
+        # Define o widget de conteúdo como o layout do botão
+        paste_btn.setLayout(btn_content)
+        paste_btn.clicked.connect(self.paste_and_detect)
+
+        # Adiciona widgets ao layout central
+        central_layout.addSpacing(50)  # Espaço no topo
+        central_layout.addWidget(label)
+        central_layout.addWidget(paste_btn, alignment=Qt.AlignCenter)
+        central_layout.addStretch(1)  # Empurra tudo para cima
+
+        # Adiciona o container central ao layout principal
+        layout.addWidget(central_container)
+        
         return tab
+
+    def paste_and_detect(self):
+        """Pega o link da área de transferência e abre a janela de download"""
+        clipboard = QGuiApplication.clipboard()
+        link = clipboard.text().strip()
+        
+        if not link:
+            QMessageBox.warning(self, "Atenção", "Nenhum link encontrado na área de transferência.")
+            return
+            
+        if "youtube.com" in link or "youtu.be" in link:
+            self.download_window = DownloadWindow(link)
+            self.download_window.show()
+        else:
+            QMessageBox.warning(self, "Erro", "Por favor cole um link válido do YouTube.")
 
     def create_settings_tab(self):
         tab = QWidget()

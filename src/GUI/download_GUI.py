@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                                QHBoxLayout, QLabel, QComboBox, QRadioButton, 
-                               QButtonGroup, QLineEdit, QPushButton, QProgressBar, QFileDialog, QMessageBox)
+                               QButtonGroup, QLineEdit, QPushButton, QFileDialog, QMessageBox)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from pytubefix import YouTube

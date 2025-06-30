@@ -7,6 +7,6 @@ def main():
     window = MediaDownloaderPro()  # Cria a janela principal (com abas: Home e Settings)
     window.show()  # Mostra a janela
     sys.exit(app.exec())  # Executa o app
-
+    
 if __name__ == "__main__":
     main()
