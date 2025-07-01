@@ -44,7 +44,7 @@ def baixar_video_audio_mesclar(url, resolucao, pasta_destino="videos", formato='
         output_path = os.path.join(pasta_destino, base_filename + ".mp4")
         video_stream.download(output_path=pasta_destino, filename=base_filename + "_video.mp4")
         audio_stream.download(output_path=pasta_destino, filename=base_filename + "_audio.mp4")
-        caminho_ffmpeg = r"C:\Users\Vinicius Leite\AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe"
+        caminho_ffmpeg = r"C:\Program Files (x86)\ffmpeg\bin\ffmpeg.exe"
         comando = [
             caminho_ffmpeg, "-y",
             "-i", video_path,
@@ -75,7 +75,7 @@ def baixar_audio(url, pasta_destino="audios", formato="mp3"):
         temp_path = os.path.join(pasta_destino, base_filename + "_audio.mp4")
         final_path = os.path.join(pasta_destino, base_filename + f".{formato}")
         audio_stream.download(output_path=pasta_destino, filename=base_filename + "_audio.mp4")
-        caminho_ffmpeg = r"C:\Users\Vinicius Leite\AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe"
+        caminho_ffmpeg = r"C:\Program Files (x86)\ffmpeg\bin\ffmpeg.exe"
         comando = [
             caminho_ffmpeg, "-y",
             "-i", temp_path,

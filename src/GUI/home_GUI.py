@@ -6,10 +6,10 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon, QPixmap, QMouseEvent,QGuiApplication
 from PySide6.QtCore import Qt
-from pytablericons import TablerIcons, OutlineIcon, FilledIcon
+# from pytablericons import TablerIcons, OutlineIcon, FilledIcon
 import sys
 from src.GUI.download_GUI import MainWindow as DownloadWindow  # Adicione este import
-
+from src.core.detector_link import detect_platform, is_valid_url
 
 
 
@@ -503,19 +503,26 @@ class MediaDownloaderPro(QWidget):
         return tab
 
     def paste_and_detect(self):
-        """Pega o link da área de transferência e abre a janela de download"""
+        """Pega o link da área de transferência e detecta a plataforma"""
         clipboard = QGuiApplication.clipboard()
         link = clipboard.text().strip()
         
         if not link:
             QMessageBox.warning(self, "Atenção", "Nenhum link encontrado na área de transferência.")
             return
+        
+        if not is_valid_url(link):
+            QMessageBox.warning(self, "Erro", "Por favor cole um link válido.")
+            return
             
-        if "youtube.com" in link or "youtu.be" in link:
-            self.download_window = DownloadWindow(link)
+        platform = detect_platform(link)
+        
+        if platform in ['youtube', 'twitch', 'spotify']:
+            # Usar a mesma GUI, mas passar a plataforma
+            self.download_window = DownloadWindow(link, platform)
             self.download_window.show()
         else:
-            QMessageBox.warning(self, "Erro", "Por favor cole um link válido do YouTube.")
+            QMessageBox.warning(self, "Erro", "Plataforma não suportada. Suportamos YouTube, Twitch e Spotify.")
 
     def create_settings_tab(self):
         tab = QWidget()
