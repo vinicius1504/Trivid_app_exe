@@ -6,9 +6,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon, QPixmap, QMouseEvent,QGuiApplication
 from PySide6.QtCore import Qt
-# from pytablericons import TablerIcons, OutlineIcon, FilledIcon
 import sys
-from src.GUI.download_GUI import MainWindow as DownloadWindow  # Adicione este import
+from src.GUI.download_GUI import MainWindow as DownloadWindow  
 from src.core.detector_link import detect_platform, is_valid_url
 
 
@@ -89,6 +88,7 @@ class MediaDownloaderPro(QWidget):
         self.setup_ui()
         main_layout.addWidget(self.body_widget)
 
+
     def create_title_bar(self): 
         bar = QWidget()
         bar.setFixedHeight(30)
@@ -113,49 +113,63 @@ class MediaDownloaderPro(QWidget):
         layout.addWidget(logo_container)
         layout.addStretch()
 
-        # Botão minimizar (amarelo)
-        btn_min = QPushButton("")
-        btn_min.setFixedSize(10, 10)
+        # Botão minimizar com ícone
+        btn_min = QPushButton()
+        btn_min.setFixedSize(20, 20)  # Aumentei um pouco para acomodar a imagem
+
+        # Carregar e definir ícone
+        min_icon = QIcon("images/icons/minimize_icon.png")  # Substitua pelo caminho da sua imagem
+        btn_min.setIcon(min_icon)
+        btn_min.setIconSize(btn_min.size())
         btn_min.setStyleSheet("""
             QPushButton {
-                background: #FFD600;
+                background: transparent;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background: #FFEA00;
+                background: rgba(255, 255, 255, 0.2);
             }
         """)
         btn_min.clicked.connect(self.showMinimized)
         layout.addWidget(btn_min)
 
-        # Botão maximizar (verde)
-        btn_max = QPushButton("")
-        btn_max.setFixedSize(10, 10)
+        # Botão maximizar com ícone
+        btn_max = QPushButton()
+        btn_max.setFixedSize(18, 18)
+        # Carregar e definir ícone
+        max_icon = QIcon("images/icons/maximize_icon.png")  # Substitua pelo caminho da sua imagem
+        btn_max.setIcon(max_icon)
+        btn_max.setIconSize(btn_max.size())      
         btn_max.setStyleSheet("""
             QPushButton {
-                background: #00C853;
+                background: transparent;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background: #69F0AE;
+                background: rgba(255, 255, 255, 0.2);
             }
         """)
         btn_max.clicked.connect(self.toggle_max_restore)
         layout.addWidget(btn_max)
 
-        # Botão fechar (vermelho)
-        btn_close = QPushButton("")
-        btn_close.setFixedSize(10, 10)
+        # Botão fechar com ícone
+        btn_close = QPushButton()
+        btn_close.setFixedSize(20, 20) 
+        # Carregar e definir ícone
+        close_icon = QIcon("images/icons/close_icon.png")  # Substitua pelo caminho da sua imagem
+        btn_close.setIcon(close_icon)
+        btn_close.setIconSize(btn_close.size())
+        
         btn_close.setStyleSheet("""
             QPushButton {
-                background: #FF5252;
+                background: transparent;
                 border: none;
                 border-radius: 10px;
             }
             QPushButton:hover {
-                background: #FF1744;
+                background: rgba(255, 0, 0, 0.3);
             }
         """)
         btn_close.clicked.connect(self.close)
@@ -167,21 +181,25 @@ class MediaDownloaderPro(QWidget):
 
         return bar
 
+
     def toggle_max_restore(self):
         if self.isMaximized():
             self.showNormal()
         else:
             self.showMaximized()
 
+
     def title_bar_mouse_press(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
             self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
 
+
     def title_bar_mouse_move(self, event: QMouseEvent):
         if event.buttons() == Qt.LeftButton:
             self.move(event.globalPosition().toPoint() - self._drag_pos)
             event.accept()
+
 
     def setup_ui(self):
         layout = self.body_layout
@@ -195,6 +213,7 @@ class MediaDownloaderPro(QWidget):
         # Painel de histórico retrátil na parte inferior
         self.history_panel = self.create_history_panel()
         layout.addWidget(self.history_panel)
+
 
     def create_history_panel(self):
         # Container principal do painel
@@ -227,33 +246,37 @@ class MediaDownloaderPro(QWidget):
         header_layout.addStretch()
         
         # Botão de toggle (setinha)
-        self.toggle_btn = QPushButton("▲")
+        self.toggle_btn = QPushButton()
         self.toggle_btn.setFixedSize(30, 30)
+        
+        # Carregar e definir ícone
+        toggle_icon = QIcon("images/icons/down_icon.png")  # Substitua pelo caminho da sua imagem
+        self.toggle_btn.setIcon(toggle_icon)
+        self.toggle_btn.setIconSize(self.toggle_btn.size())
         self.toggle_btn.setStyleSheet("""
             QPushButton {
                 background: transparent;
                 border: none;
-                color: white;
-                font-size: 16px;
-                font-weight: bold;
-            }
+            }   
             QPushButton:hover {
                 background-color: rgba(255, 255, 255, 0.1);
                 border-radius: 15px;
             }
         """)
+
         self.toggle_btn.clicked.connect(self.toggle_history)
         header_layout.addWidget(self.toggle_btn)
-        
+
         # Conteúdo do histórico (aumentado para 300px)
         self.history_content = self.create_history_content()
-        self.history_content.setFixedHeight(300)  # Aumentado de 200 para 300
+        self.history_content.setFixedHeight(400)  # Aumentado de 200 para 300
         
         # Adicionar ao layout
         panel_layout.addWidget(header_bar)
         panel_layout.addWidget(self.history_content)
         
         return panel_container
+
 
     def create_history_content(self):
         content_widget = QWidget()
@@ -327,6 +350,7 @@ class MediaDownloaderPro(QWidget):
         layout.addWidget(scroll_area)
 
         return content_widget
+
 
     def create_file_card(self, file_data):
         """Cria um card individual para cada arquivo"""
@@ -411,21 +435,19 @@ class MediaDownloaderPro(QWidget):
 
         return card
 
-    def toggle_history(self):
-        if self.history_content.isVisible():
-            self.history_content.hide()
-            self.toggle_btn.setText("▼")
-        else:
-            self.history_content.show()
-            self.toggle_btn.setText("▲")
 
     def toggle_history(self):
         if self.history_content.isVisible():
             self.history_content.hide()
-            self.toggle_btn.setText("▼")
+            # Trocar para imagem de seta para baixo
+            down_icon = QIcon("images/icons/up_icon.png")  # Substitua pelo caminho da sua imagem
+            self.toggle_btn.setIcon(down_icon)
         else:
             self.history_content.show()
-            self.toggle_btn.setText("▲")
+            # Trocar para imagem de seta para cima
+            up_icon = QIcon("images/icons/down_icon.png")  # Substitua pelo caminho da sua imagem
+            self.toggle_btn.setIcon(up_icon)
+
 
     def create_home_tab(self):
         tab = QWidget()
@@ -502,6 +524,7 @@ class MediaDownloaderPro(QWidget):
         
         return tab
 
+
     def paste_and_detect(self):
         """Pega o link da área de transferência e detecta a plataforma"""
         clipboard = QGuiApplication.clipboard()
@@ -523,6 +546,7 @@ class MediaDownloaderPro(QWidget):
             self.download_window.show()
         else:
             QMessageBox.warning(self, "Erro", "Plataforma não suportada. Suportamos YouTube, Twitch e Spotify.")
+
 
     def create_settings_tab(self):
         tab = QWidget()
@@ -608,6 +632,7 @@ class MediaDownloaderPro(QWidget):
 
         return tab
 
+
     def create_history_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
@@ -680,6 +705,7 @@ class MediaDownloaderPro(QWidget):
         layout.addWidget(table)
         layout.addStretch()
         return tab
+
 
     def detect_clicked(self):
 
