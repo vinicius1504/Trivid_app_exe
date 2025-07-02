@@ -1,15 +1,16 @@
 import sys
 import os
+import requests
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                                QHBoxLayout, QLabel, QComboBox, QRadioButton, 
                                QButtonGroup, QLineEdit, QPushButton, QFileDialog, QMessageBox)
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QByteArray
 from PySide6.QtGui import QPixmap
 from pytubefix import YouTube
 
 # Importar todos os downloaders
-from src.core.youtube_downloader import baixar_video_audio_mesclar, baixar_audio, baixar_thumbnail
-from src.core.twitch_downloader import baixar_video_twitch, baixar_audio_twitch, baixar_thumbnail_twitch
+from src.core.downloders.youtube_downloader import baixar_video_audio_mesclar, baixar_audio, baixar_thumbnail
+from src.core.downloders.twitch_downloader import baixar_video_twitch, baixar_audio_twitch, baixar_thumbnail_twitch
 # from src.core.spotify_downloader import baixar_audio_spotify, baixar_video_spotify, baixar_thumbnail_spotify
 from src.core.detector_link import get_platform_info
 
@@ -208,6 +209,42 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(self, "Sucesso", f"Download da thumbnail concluído:\n{caminho}")
             else:
                 QMessageBox.critical(self, "Erro", "Falha no download da thumbnail.")
+    
+    def handle_spotify_download(self, selected_id, output_folder):
+        # Spotify só tem áudio (e imagem de capa)
+        if selected_id == 0:  # Tentou baixar vídeo
+            QMessageBox.warning(self, "Aviso", "Spotify não suporta vídeos. Tentando baixar áudio...")
+            selected_id = 1
+        
+        # AUDIO
+        if selected_id == 1:
+            try:
+                format_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
+                formato = format_combo.currentText().lower()
+            except Exception:
+                formato = "mp3"
+            # Substitua esta linha quando implementar o módulo de spotify
+            # caminho = baixar_audio_spotify(self.video_url, output_folder, formato)
+            caminho = None
+            if caminho:
+                QMessageBox.information(self, "Sucesso", f"Download de áudio concluído:\n{caminho}")
+            else:
+                QMessageBox.critical(self, "Erro", "Falha no download de áudio do Spotify.")
+
+        # IMAGEM
+        elif selected_id == 2:
+            try:
+                format_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
+                formato = format_combo.currentText().lower()
+            except Exception:
+                formato = "jpg"
+            # Substitua esta linha quando implementar o módulo de spotify
+            # caminho = baixar_thumbnail_spotify(self.video_url, output_folder, formato)
+            caminho = None
+            if caminho:
+                QMessageBox.information(self, "Sucesso", f"Download da capa concluído:\n{caminho}")
+            else:
+                QMessageBox.critical(self, "Erro", "Falha no download da capa do Spotify.")
 
     def create_video_info_section(self):
         layout = QHBoxLayout()
@@ -288,6 +325,229 @@ class MainWindow(QMainWindow):
         self.button_group.buttonClicked.connect(self.update_options_section)
         
         return layout
+        
+    def update_options_section(self):
+        """
+        Atualiza as opções com base no tipo de conteúdo selecionado
+        """
+        # Limpa todos os widgets e sublayouts do options_layout
+        while self.options_layout.count():
+            item = self.options_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self.clear_layout(item.layout())
+        
+        # Adiciona a nova seção de opções
+        selected_id = self.button_group.checkedId()
+        
+        if selected_id == 0:  # Vídeo
+            self.add_video_options()
+        elif selected_id == 1:  # Áudio
+            self.add_audio_options()
+        elif selected_id == 2:  # Imagem
+            self.add_image_options()
 
-    # ... resto dos métodos permanecem iguais (create_destination_section, browse_folder, etc.)
-    # ... métodos de opções (add_audio_options, add_video_options, etc.)
+    def clear_layout(self, layout):
+        """
+        Remove todos os itens de um layout
+        """
+        while layout.count():
+            item = layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.layout():
+                self.clear_layout(item.layout())
+
+    def add_video_options(self):
+        """
+        Adiciona opções para download de vídeo
+        """
+        # Primeira linha de opções
+        first_row = QHBoxLayout()
+        first_row.setSpacing(8)
+        
+        # Resolução
+        resolution_layout = QVBoxLayout()
+        resolution_label = QLabel("Resolution")
+        resolution_label.setStyleSheet("font-weight: bold;")
+        resolution_combo = QComboBox()
+        
+        if self.platform == 'youtube':
+            resolutions = ["144p", "240p", "360p", "480p", "720p", "1080p"]
+        elif self.platform == 'twitch':
+            resolutions = ["160p", "360p", "480p", "720p", "1080p",]
+        else:
+            resolutions = ["360p", "480p", "720p", "1080p"]
+            
+        resolution_combo.addItems(resolutions)
+        resolution_combo.setFixedWidth(120)
+        resolution_layout.addWidget(resolution_label)
+        resolution_layout.addWidget(resolution_combo)
+        
+        # Formato
+        format_layout = QVBoxLayout()
+        format_label = QLabel("Format")
+        format_label.setStyleSheet("font-weight: bold;")
+        format_combo = QComboBox()
+        format_combo.addItems(["MP4", "MKV", "AVI", "WEBM"])
+        format_combo.setFixedWidth(120)
+        format_layout.addWidget(format_label)
+        format_layout.addWidget(format_combo)
+        
+        first_row.addLayout(resolution_layout)
+        first_row.addLayout(format_layout)
+        first_row.addStretch()
+        
+        self.options_layout.addLayout(first_row)
+        
+    def add_audio_options(self):
+        """
+        Adiciona opções para download de áudio
+        """
+        # Primeira linha de opções
+        first_row = QHBoxLayout()
+        first_row.setSpacing(8)
+        
+        # Formato de áudio
+        format_layout = QVBoxLayout()
+        format_label = QLabel("Format")
+        format_label.setStyleSheet("font-weight: bold;")
+        format_combo = QComboBox()
+        format_combo.addItems(["MP3", "WAV", "AAC", "FLAC", "OGG"])
+        format_combo.setFixedWidth(120)
+        format_layout.addWidget(format_label)
+        format_layout.addWidget(format_combo)
+        
+        # Bitrate
+        bitrate_layout = QVBoxLayout()
+        bitrate_label = QLabel("Bitrate")
+        bitrate_label.setStyleSheet("font-weight: bold;")
+        bitrate_combo = QComboBox()
+        bitrate_combo.addItems(["128 kbps", "192 kbps", "256 kbps", "320 kbps"])
+        bitrate_combo.setFixedWidth(120)
+        bitrate_layout.addWidget(bitrate_label)
+        bitrate_layout.addWidget(bitrate_combo)
+        
+        first_row.addLayout(format_layout)
+        first_row.addLayout(bitrate_layout)
+        first_row.addStretch()
+        
+        self.options_layout.addLayout(first_row)
+    
+    def add_image_options(self):
+        """
+        Adiciona opções para download de imagem
+        """
+        row = QHBoxLayout()
+        row.setSpacing(8)
+        
+        # Formato de imagem
+        format_layout = QVBoxLayout()
+        format_label = QLabel("Format")
+        format_label.setStyleSheet("font-weight: bold;")
+        format_combo = QComboBox()
+        format_combo.addItems(["JPG", "PNG", "WEBP"])
+        format_combo.setFixedWidth(120)
+        format_layout.addWidget(format_label)
+        format_layout.addWidget(format_combo)
+        
+        
+        row.addLayout(format_layout)
+        row.addStretch()
+        
+        self.options_layout.addLayout(row)
+    
+    def create_destination_section(self):
+        layout = QVBoxLayout()
+        title_label = QLabel("Destination Folder")
+        title_label.setStyleSheet("font-weight: bold; margin-top: 20px;")
+        layout.addWidget(title_label)
+
+        folder_layout = QHBoxLayout()
+        self.folder_input = QLineEdit(self.output_folder)
+        self.folder_input.setFixedHeight(35)
+        browse_button = QPushButton("Browse")
+        browse_button.setFixedSize(80, 35)
+        browse_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f0f0f0;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+            }
+            QPushButton:hover {
+                background-color: #e0e0e0;
+            }
+        """)
+
+        browse_button.clicked.connect(self.browse_folder)
+
+        folder_layout.addWidget(self.folder_input)
+        folder_layout.addWidget(browse_button)
+        layout.addLayout(folder_layout)
+        return layout
+
+    def browse_folder(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Folder", self.folder_input.text())
+        if folder:
+            self.folder_input.setText(folder)
+            self.output_folder = folder
+
+    def load_video_info(self, url):
+        """
+        Carrega informações do vídeo de acordo com a plataforma
+        """
+        try:
+            if self.platform == 'youtube':
+                self.yt = YouTube(url)
+                self.update_youtube_info()
+            # Implementar para outras plataformas
+            # elif self.platform == 'twitch':
+            #    self.update_twitch_info()
+            # elif self.platform == 'spotify':
+            #    self.update_spotify_info()
+            
+            # Inicializa as opções baseadas no tipo de conteúdo selecionado
+            self.update_options_section()
+        except Exception as e:
+            print(f"Erro ao carregar informações: {e}")
+
+    def update_youtube_info(self):
+        """
+        Atualiza a interface com informações do YouTube
+        """
+        if not self.yt:
+            return
+            
+        try:
+            self.title_label.setText(self.yt.title)
+            self.channel_label.setText(self.yt.author)
+            
+            # Formata a duração
+            duration = self.yt.length
+            mins, secs = divmod(duration, 60)
+            self.duration_label.setText(f"Duration: {mins}:{secs:02d}")
+            
+            # Carrega a thumbnail
+            try:
+                response = requests.get(self.yt.thumbnail_url)
+                if response.status_code == 200:
+                    pixmap = QPixmap()
+                    pixmap.loadFromData(QByteArray(response.content))
+                    pixmap = pixmap.scaled(120, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                    self.thumbnail_label.setPixmap(pixmap)
+            except Exception as e:
+                print(f"Erro ao carregar thumbnail: {e}")
+        except Exception as e:
+            print(f"Erro ao atualizar informações do YouTube: {e}")
+
+
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
