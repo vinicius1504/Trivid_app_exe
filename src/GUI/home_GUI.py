@@ -13,6 +13,7 @@ from src.core.detector_link import detect_platform, is_valid_url
 
 
 class MediaDownloaderPro(QWidget):
+    # Inicializa a janela principal e configura layout básico
     def __init__(self):
         super().__init__()
         self.setWindowTitle("TriviD")
@@ -88,7 +89,7 @@ class MediaDownloaderPro(QWidget):
         self.setup_ui()
         main_layout.addWidget(self.body_widget)
 
-
+    # Cria barra de título personalizada com botões minimizar/maximizar/fechar
     def create_title_bar(self): 
         bar = QWidget()
         bar.setFixedHeight(30)
@@ -181,26 +182,26 @@ class MediaDownloaderPro(QWidget):
 
         return bar
 
-
+    # Alterna entre maximizar e restaurar janela
     def toggle_max_restore(self):
         if self.isMaximized():
             self.showNormal()
         else:
             self.showMaximized()
 
-
+    # Captura clique para começar a arrastar janela
     def title_bar_mouse_press(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
             self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
 
-
+    # Move a janela quando arrastada
     def title_bar_mouse_move(self, event: QMouseEvent):
         if event.buttons() == Qt.LeftButton:
             self.move(event.globalPosition().toPoint() - self._drag_pos)
             event.accept()
 
-
+    # Configura as abas principais e painel de histórico
     def setup_ui(self):
         layout = self.body_layout
 
@@ -214,7 +215,7 @@ class MediaDownloaderPro(QWidget):
         self.history_panel = self.create_history_panel()
         layout.addWidget(self.history_panel)
 
-
+    # Cria painel retrátil de histórico na parte inferior
     def create_history_panel(self):
         # Container principal do painel
         panel_container = QWidget()
@@ -269,7 +270,7 @@ class MediaDownloaderPro(QWidget):
 
         # Conteúdo do histórico (aumentado para 300px)
         self.history_content = self.create_history_content()
-        self.history_content.setFixedHeight(400)  # Aumentado de 200 para 300
+        self.history_content.setFixedHeight(500)  # Aumentado de 200 para 300
         
         # Adicionar ao layout
         panel_layout.addWidget(header_bar)
@@ -277,7 +278,7 @@ class MediaDownloaderPro(QWidget):
         
         return panel_container
 
-
+    # Cria o conteúdo do histórico com cards de arquivos
     def create_history_content(self):
         content_widget = QWidget()
         content_widget.setStyleSheet("""
@@ -351,7 +352,7 @@ class MediaDownloaderPro(QWidget):
 
         return content_widget
 
-
+    # Cria um card individual para cada arquivo no histórico
     def create_file_card(self, file_data):
         """Cria um card individual para cada arquivo"""
         card = QWidget()
@@ -434,8 +435,8 @@ class MediaDownloaderPro(QWidget):
         layout.addWidget(delete_btn)
 
         return card
-
-
+    
+    # Alterna visibilidade do painel de histórico
     def toggle_history(self):
         if self.history_content.isVisible():
             self.history_content.hide()
@@ -448,7 +449,7 @@ class MediaDownloaderPro(QWidget):
             up_icon = QIcon("images/icons/down_icon.png")  # Substitua pelo caminho da sua imagem
             self.toggle_btn.setIcon(up_icon)
 
-
+    # Cria a aba inicial com o botão "Paste Here"
     def create_home_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
@@ -524,7 +525,7 @@ class MediaDownloaderPro(QWidget):
         
         return tab
 
-
+    # Pega o link da área de transferência e detecta a plataforma
     def paste_and_detect(self):
         """Pega o link da área de transferência e detecta a plataforma"""
         clipboard = QGuiApplication.clipboard()
@@ -547,7 +548,7 @@ class MediaDownloaderPro(QWidget):
         else:
             QMessageBox.warning(self, "Erro", "Plataforma não suportada. Suportamos YouTube, Twitch e Spotify.")
 
-
+    # Cria a aba de configurações com informações da conta e benefícios do plano
     def create_settings_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
@@ -632,7 +633,7 @@ class MediaDownloaderPro(QWidget):
 
         return tab
 
-
+    # Cria a aba de histórico com tabela de downloads
     def create_history_tab(self):
         tab = QWidget()
         layout = QVBoxLayout(tab)
@@ -706,9 +707,8 @@ class MediaDownloaderPro(QWidget):
         layout.addStretch()
         return tab
 
-
+    # Detecta o link e abre a janela de download
     def detect_clicked(self):
-
         if not self.link_input.text():
             QMessageBox.warning(self, "Atenção", "Cole um link antes de buscar.")
             return

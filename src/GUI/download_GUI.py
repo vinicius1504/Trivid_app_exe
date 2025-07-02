@@ -13,6 +13,7 @@ from src.core.detector_link import get_platform_info
 
 
 class MainWindow(QMainWindow):
+
     def __init__(self, video_url=None, platform='youtube'):
         super().__init__()
         self.video_url = video_url
