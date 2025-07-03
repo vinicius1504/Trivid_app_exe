@@ -8,12 +8,13 @@ from PySide6.QtGui import QPixmap
 from pytubefix import YouTube
 # Importar todos os downloaders
 from src.core.downloders.youtube_downloader import baixar_video_audio_mesclar, baixar_audio, baixar_thumbnail
-from src.core.downloders.twitch_downloader import baixar_video_twitch, baixar_audio_twitch, baixar_thumbnail_twitch
+from src.core.downloders.twitch_downloader import baixar_video_twitch, baixar_audio_twitch, baixar_thumbnail_twitch, obter_info_twitch
 from src.core.detector_link import get_platform_info
 
 
 class MainWindow(QMainWindow):
 
+    # Inicializa a janela principal
     def __init__(self, video_url=None, platform='youtube'):
         super().__init__()
         self.video_url = video_url
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow):
         if self.video_url:
             self.load_video_info(self.video_url)
 
-
+    # Configura a UI do conteúdo principal
     def setup_content_ui(self, parent_widget):
         """Configura a UI do conteúdo principal"""
         self.layout = QVBoxLayout(parent_widget)
@@ -64,16 +65,17 @@ class MainWindow(QMainWindow):
         
         self.layout.addStretch()
 
-
+    # Cria a linha de botões Download e Cancel
     def create_button_row(self):
+        # Cria os botões Download e Cancel com cor da plataforma
         layout = QHBoxLayout()
         download_btn = QPushButton("Download")
         cancel_btn = QPushButton("Cancel")
         
         # Usar cor da plataforma para o botão
         btn_style = f"""
-            QPushButton {{
-                background-color: {self.platform_info['button_color']};
+            QPushButton {{  
+                background-color: {self.platform_info['color']};
                 color: white;
                 border: none;
                 border-radius: 6px;
@@ -82,7 +84,7 @@ class MainWindow(QMainWindow):
                 font-weight: bold;
             }}
             QPushButton:hover {{
-                background-color: {self.platform_info['button_color']}CC;
+                background-color: {self.platform_info['color']}CC;
             }}
         """
         download_btn.setStyleSheet(btn_style)
@@ -107,7 +109,7 @@ class MainWindow(QMainWindow):
         cancel_btn.clicked.connect(self.close)
         return layout
 
-
+    # Manipula o evento de download
     def handle_download(self):
         if not self.video_url:
             return
@@ -125,15 +127,14 @@ class MainWindow(QMainWindow):
         elif self.platform == 'spotify':
             self.handle_spotify_download(selected_id, output_folder)
 
-
+    # Manipula o download de acordo com a plataforma e tipo de conteúdo
     def handle_youtube_download(self, selected_id, output_folder):
+        # Executa downloads específicos do YouTube (vídeo, áudio ou thumbnail)
         # VIDEO
         if selected_id == 0:
             try:
-                resolution_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
-                format_combo = self.options_layout.itemAt(0).layout().itemAt(2).layout().itemAt(1).widget()
-                resolucao = resolution_combo.currentText().split()[0]
-                formato = format_combo.currentText().lower()
+                resolucao = self.resolution_combo.currentText().split()[0]
+                formato = self.video_format_combo.currentText().lower()
             except Exception:
                 resolucao = "360p"
                 formato = "mp4"
@@ -146,8 +147,7 @@ class MainWindow(QMainWindow):
         # AUDIO
         elif selected_id == 1:
             try:
-                format_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
-                formato = format_combo.currentText().lower()
+                formato = self.audio_format_combo.currentText().lower()
             except Exception:
                 formato = "mp3"
             caminho = baixar_audio(self.video_url, output_folder, formato)
@@ -159,8 +159,7 @@ class MainWindow(QMainWindow):
         # IMAGEM
         elif selected_id == 2:
             try:
-                format_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
-                formato = format_combo.currentText().lower()
+                formato = self.image_format_combo.currentText().lower()
             except Exception:
                 formato = "jpg"
             caminho = baixar_thumbnail(self.video_url, output_folder, formato)
@@ -169,15 +168,14 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox.critical(self, "Erro", "Falha no download da thumbnail.")
 
-
+    # Manipula o download de acordo com a plataforma e tipo de conteúdo
     def handle_twitch_download(self, selected_id, output_folder):
+        # Executa downloads específicos do Twitch (vídeo, áudio ou thumbnail)
         # VIDEO
         if selected_id == 0:
             try:
-                resolution_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
-                format_combo = self.options_layout.itemAt(0).layout().itemAt(2).layout().itemAt(1).widget()
-                resolucao = resolution_combo.currentText().split()[0]
-                formato = format_combo.currentText().lower()
+                resolucao = self.resolution_combo.currentText().split()[0]
+                formato = self.video_format_combo.currentText().lower()
             except Exception:
                 resolucao = "720p"
                 formato = "mp4"
@@ -190,8 +188,7 @@ class MainWindow(QMainWindow):
         # AUDIO
         elif selected_id == 1:
             try:
-                format_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
-                formato = format_combo.currentText().lower()
+                formato = self.audio_format_combo.currentText().lower()
             except Exception:
                 formato = "mp3"
             caminho = baixar_audio_twitch(self.video_url, output_folder, formato)
@@ -203,8 +200,7 @@ class MainWindow(QMainWindow):
         # IMAGEM
         elif selected_id == 2:
             try:
-                format_combo = self.options_layout.itemAt(0).layout().itemAt(0).layout().itemAt(1).widget()
-                formato = format_combo.currentText().lower()
+                formato = self.image_format_combo.currentText().lower()
             except Exception:
                 formato = "jpg"
             caminho = baixar_thumbnail_twitch(self.video_url, output_folder, formato)
@@ -213,7 +209,7 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox.critical(self, "Erro", "Falha no download da thumbnail.")
 
-
+    # Manipula o download de acordo com a plataforma e tipo de conteúdo
     def handle_spotify_download(self, selected_id):
         # Spotify só tem áudio (e imagem de capa)
         if selected_id == 0:  # Tentou baixar vídeo
@@ -250,7 +246,7 @@ class MainWindow(QMainWindow):
             else:
                 QMessageBox.critical(self, "Erro", "Falha no download da capa do Spotify.")
 
-
+    # Cria a seção de informações do vídeo
     def create_video_info_section(self):
         layout = QHBoxLayout()
         self.thumbnail_label = QLabel()
@@ -295,7 +291,7 @@ class MainWindow(QMainWindow):
 
         return layout
 
-
+    # Cria a seção de tipo de conteúdo (rádios)
     def create_content_type_section(self):
         layout = QVBoxLayout()
         
@@ -332,7 +328,7 @@ class MainWindow(QMainWindow):
         
         return layout
 
-
+    # Atualiza as opções com base no tipo de conteúdo selecionado
     def update_options_section(self):
         """
         Atualiza as opções com base no tipo de conteúdo selecionado
@@ -355,7 +351,7 @@ class MainWindow(QMainWindow):
         elif selected_id == 2:  # Imagem
             self.add_image_options()
 
-
+    # Limpa todos os itens de um layout
     def clear_layout(self, layout):
         """
         Remove todos os itens de um layout
@@ -367,11 +363,9 @@ class MainWindow(QMainWindow):
             elif item.layout():
                 self.clear_layout(item.layout())
 
-
+    # Adiciona opções para download de vídeo
     def add_video_options(self):
-        """
-        Adiciona opções para download de vídeo
-        """
+        # Adiciona opções para download de vídeo
         # Primeira linha de opções
         first_row = QHBoxLayout()
         first_row.setSpacing(8)
@@ -380,7 +374,7 @@ class MainWindow(QMainWindow):
         resolution_layout = QVBoxLayout()
         resolution_label = QLabel("Resolution")
         resolution_label.setStyleSheet("font-weight: bold;")
-        resolution_combo = QComboBox()
+        self.resolution_combo = QComboBox()  # Tornar atributo da classe
         
         if self.platform == 'youtube' and self.yt:
             # Carregar resoluções disponíveis do vídeo
@@ -388,34 +382,34 @@ class MainWindow(QMainWindow):
                 from src.core.downloders.youtube_downloader import listar_resolucoes_disponiveis
                 resolutions = listar_resolucoes_disponiveis(self.video_url)
                 if resolutions:
-                    resolution_combo.addItems(resolutions)
+                    self.resolution_combo.addItems(resolutions)
                 else:
                     # Fallback se não conseguir carregar
-                    resolution_combo.addItems(["144p", "240p", "360p", "480p", "720p", "1080p"])
+                    self.resolution_combo.addItems(["144p", "240p", "360p", "480p", "720p", "1080p"])
             except Exception as e:
                 print(f"Erro ao carregar resoluções: {e}")
                 # Fallback para resoluções padrão
-                resolution_combo.addItems(["144p", "240p", "360p", "480p", "720p", "1080p"])
+                self.resolution_combo.addItems(["144p", "240p", "360p", "480p", "720p", "1080p"])
         elif self.platform == 'twitch':
             resolutions = ["160p", "360p", "480p", "720p", "1080p"]
-            resolution_combo.addItems(resolutions)
+            self.resolution_combo.addItems(resolutions)
         else:
             resolutions = ["360p", "480p", "720p", "1080p"]
-            resolution_combo.addItems(resolutions)
+            self.resolution_combo.addItems(resolutions)
             
-        resolution_combo.setFixedWidth(120)
+        self.resolution_combo.setFixedWidth(120)
         resolution_layout.addWidget(resolution_label)
-        resolution_layout.addWidget(resolution_combo)
+        resolution_layout.addWidget(self.resolution_combo)
         
         # Formato
         format_layout = QVBoxLayout()
         format_label = QLabel("Format")
         format_label.setStyleSheet("font-weight: bold;")
-        format_combo = QComboBox()
-        format_combo.addItems(["MP4", "MKV", "AVI", "WEBM"])
-        format_combo.setFixedWidth(120)
+        self.video_format_combo = QComboBox()  # Tornar atributo da classe
+        self.video_format_combo.addItems(["MP4", "MKV", "AVI", "WEBM"])
+        self.video_format_combo.setFixedWidth(120)
         format_layout.addWidget(format_label)
-        format_layout.addWidget(format_combo)
+        format_layout.addWidget(self.video_format_combo)
         
         first_row.addLayout(resolution_layout)
         first_row.addLayout(format_layout)
@@ -423,11 +417,9 @@ class MainWindow(QMainWindow):
         
         self.options_layout.addLayout(first_row)
 
-
+    # Adiciona opções para download de áudio
     def add_audio_options(self):
-        """
-        Adiciona opções para download de áudio
-        """
+        # Adiciona opções para download de áudio
         # Primeira linha de opções
         first_row = QHBoxLayout()
         first_row.setSpacing(8)
@@ -436,21 +428,21 @@ class MainWindow(QMainWindow):
         format_layout = QVBoxLayout()
         format_label = QLabel("Format")
         format_label.setStyleSheet("font-weight: bold;")
-        format_combo = QComboBox()
-        format_combo.addItems(["MP3", "WAV", "AAC", "FLAC", "OGG"])
-        format_combo.setFixedWidth(120)
+        self.audio_format_combo = QComboBox()  # Tornar atributo da classe
+        self.audio_format_combo.addItems(["MP3", "WAV", "AAC", "FLAC", "OGG"])
+        self.audio_format_combo.setFixedWidth(120)
         format_layout.addWidget(format_label)
-        format_layout.addWidget(format_combo)
+        format_layout.addWidget(self.audio_format_combo)
         
         # Bitrate
         bitrate_layout = QVBoxLayout()
         bitrate_label = QLabel("Bitrate")
         bitrate_label.setStyleSheet("font-weight: bold;")
-        bitrate_combo = QComboBox()
-        bitrate_combo.addItems(["128 kbps", "192 kbps", "256 kbps", "320 kbps"])
-        bitrate_combo.setFixedWidth(120)
+        self.bitrate_combo = QComboBox()  # Tornar atributo da classe
+        self.bitrate_combo.addItems(["128 kbps", "192 kbps", "256 kbps", "320 kbps"])
+        self.bitrate_combo.setFixedWidth(120)
         bitrate_layout.addWidget(bitrate_label)
-        bitrate_layout.addWidget(bitrate_combo)
+        bitrate_layout.addWidget(self.bitrate_combo)
         
         first_row.addLayout(format_layout)
         first_row.addLayout(bitrate_layout)
@@ -458,11 +450,9 @@ class MainWindow(QMainWindow):
         
         self.options_layout.addLayout(first_row)
 
-
+    # Adiciona opções para download de imagem
     def add_image_options(self):
-        """
-        Adiciona opções para download de imagem
-        """
+        # Adiciona opções para download de imagem
         row = QHBoxLayout()
         row.setSpacing(8)
         
@@ -470,19 +460,18 @@ class MainWindow(QMainWindow):
         format_layout = QVBoxLayout()
         format_label = QLabel("Format")
         format_label.setStyleSheet("font-weight: bold;")
-        format_combo = QComboBox()
-        format_combo.addItems(["JPG", "PNG", "WEBP"])
-        format_combo.setFixedWidth(120)
+        self.image_format_combo = QComboBox()  # Tornar atributo da classe
+        self.image_format_combo.addItems(["JPG", "PNG", "WEBP"])
+        self.image_format_combo.setFixedWidth(120)
         format_layout.addWidget(format_label)
-        format_layout.addWidget(format_combo)
-        
+        format_layout.addWidget(self.image_format_combo)
         
         row.addLayout(format_layout)
         row.addStretch()
         
         self.options_layout.addLayout(row)
 
-
+    # Cria a seção de destino
     def create_destination_section(self):
         layout = QVBoxLayout()
         title_label = QLabel("Destination Folder")
@@ -512,14 +501,14 @@ class MainWindow(QMainWindow):
         layout.addLayout(folder_layout)
         return layout
 
-
+    # Abre o diálogo para selecionar a pasta de destino
     def browse_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Folder", self.folder_input.text())
         if folder:
             self.folder_input.setText(folder)
             self.output_folder = folder
 
-
+    # Carrega informações do vídeo de acordo com a plataforma
     def load_video_info(self, url):
         """
         Carrega informações do vídeo de acordo com a plataforma
@@ -528,9 +517,9 @@ class MainWindow(QMainWindow):
             if self.platform == 'youtube':
                 self.yt = YouTube(url)
                 self.update_youtube_info()
-            # Implementar para outras plataformas
-            # elif self.platform == 'twitch':
-            #    self.update_twitch_info()
+            elif self.platform == 'twitch':
+                self.twitch_info = obter_info_twitch(url)
+                self.update_twitch_info()
             # elif self.platform == 'spotify':
             #    self.update_spotify_info()
             
@@ -539,7 +528,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"Erro ao carregar informações: {e}")
 
-
+    # Atualiza a interface com informações do YouTube
     def update_youtube_info(self):
         """
         Atualiza a interface com informações do YouTube
@@ -568,6 +557,37 @@ class MainWindow(QMainWindow):
                 print(f"Erro ao carregar thumbnail: {e}")
         except Exception as e:
             print(f"Erro ao atualizar informações do YouTube: {e}")
+
+    # Atualiza a interface com dados específicos do Twitch (título, canal, duração, thumbnail)
+    def update_twitch_info(self):
+        if not self.twitch_info:
+            return
+            
+        try:
+            self.title_label.setText(self.twitch_info['title'])
+            self.channel_label.setText(self.twitch_info['uploader'])
+            
+            # Formata a duração
+            duration = self.twitch_info['duration']
+            if duration:
+                mins, secs = divmod(duration, 60)
+                self.duration_label.setText(f"Duration: {mins}:{secs:02d}")
+            else:
+                self.duration_label.setText("Duration: Live Stream")
+            
+            # Carrega a thumbnail
+            try:
+                if self.twitch_info['thumbnail']:
+                    response = requests.get(self.twitch_info['thumbnail'])
+                    if response.status_code == 200:
+                        pixmap = QPixmap()
+                        pixmap.loadFromData(QByteArray(response.content))
+                        pixmap = pixmap.scaled(120, 90, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        self.thumbnail_label.setPixmap(pixmap)
+            except Exception as e:
+                print(f"Erro ao carregar thumbnail: {e}")
+        except Exception as e:
+            print(f"Erro ao atualizar informações do Twitch: {e}")
 
 
 def main():

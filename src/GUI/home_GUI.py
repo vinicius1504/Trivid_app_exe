@@ -94,7 +94,7 @@ class MediaDownloaderPro(QWidget):
         bar = QWidget()
         bar.setFixedHeight(30)
         bar.setStyleSheet("""
-            background: #007474;
+            background: #01716F;
         """)
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(8, 0, 8, 0)
@@ -126,7 +126,6 @@ class MediaDownloaderPro(QWidget):
             QPushButton {
                 background: transparent;
                 border: none;
-                border-radius: 10px;
             }
             QPushButton:hover {
                 background: rgba(255, 255, 255, 0.2);
@@ -146,7 +145,6 @@ class MediaDownloaderPro(QWidget):
             QPushButton {
                 background: transparent;
                 border: none;
-                border-radius: 10px;
             }
             QPushButton:hover {
                 background: rgba(255, 255, 255, 0.2);
@@ -161,16 +159,14 @@ class MediaDownloaderPro(QWidget):
         # Carregar e definir ícone
         close_icon = QIcon("images/icons/close_icon.png")  # Substitua pelo caminho da sua imagem
         btn_close.setIcon(close_icon)
-        btn_close.setIconSize(btn_close.size())
-        
+        btn_close.setIconSize(btn_close.size()) 
         btn_close.setStyleSheet("""
             QPushButton {
                 background: transparent;
                 border: none;
-                border-radius: 10px;
             }
             QPushButton:hover {
-                background: rgba(255, 0, 0, 0.3);
+                background: rgba(255, 255, 255, 0.2);
             }
         """)
         btn_close.clicked.connect(self.close)
@@ -250,8 +246,8 @@ class MediaDownloaderPro(QWidget):
         self.toggle_btn = QPushButton()
         self.toggle_btn.setFixedSize(30, 30)
         
-        # Carregar e definir ícone
-        toggle_icon = QIcon("images/icons/down_icon.png")  # Substitua pelo caminho da sua imagem
+        # Carregar ícone para baixo (já que vai começar fechado)
+        toggle_icon = QIcon("images/icons/down_icon.png")
         self.toggle_btn.setIcon(toggle_icon)
         self.toggle_btn.setIconSize(self.toggle_btn.size())
         self.toggle_btn.setStyleSheet("""
@@ -268,9 +264,10 @@ class MediaDownloaderPro(QWidget):
         self.toggle_btn.clicked.connect(self.toggle_history)
         header_layout.addWidget(self.toggle_btn)
 
-        # Conteúdo do histórico (aumentado para 300px)
+        # Conteúdo do histórico (inicializar como oculto)
         self.history_content = self.create_history_content()
-        self.history_content.setFixedHeight(500)  # Aumentado de 200 para 300
+        self.history_content.setFixedHeight(500)
+        self.history_content.hide()  # Começa oculto
         
         # Adicionar ao layout
         panel_layout.addWidget(header_bar)
@@ -601,7 +598,7 @@ class MediaDownloaderPro(QWidget):
                 background-color: #004d4d;
             }
         """)
-        account_layout.addWidget(manage_btn, 2, 1, alignment=Qt.AlignLeft)
+        account_layout.addWidget(manage_btn, 2, 1, alignment=Qt.AlignRight)
 
         # Adiciona o box ao layout principal da aba
         layout.addWidget(account_box)
