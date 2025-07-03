@@ -7,8 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon, QPixmap, QMouseEvent,QGuiApplication
 from PySide6.QtCore import Qt
 import sys
-from src.GUI.download_GUI import MainWindow as DownloadWindow
-from src.GUI.history_GUI import HistoryPanel
+from src.GUI.download_GUI import MainWindow as DownloadWindow  
 from src.core.detector_link import detect_platform, is_valid_url
 
 
@@ -198,7 +197,7 @@ class MediaDownloaderPro(QWidget):
             self.move(event.globalPosition().toPoint() - self._drag_pos)
             event.accept()
 
-    # Configura a interface do usuário com abas e painel de histórico
+    # Configura as abas principais e painel de histórico
     def setup_ui(self):
         layout = self.body_layout
 
@@ -209,8 +208,243 @@ class MediaDownloaderPro(QWidget):
         layout.addWidget(self.tabs)
         
         # Painel de histórico retrátil na parte inferior
-        self.history_panel = HistoryPanel()  # Agora usa a classe separada
+        self.history_panel = self.create_history_panel()
         layout.addWidget(self.history_panel)
+
+    # Cria painel retrátil de histórico na parte inferior
+    def create_history_panel(self):
+        # Container principal do painel
+        panel_container = QWidget()
+        panel_layout = QVBoxLayout(panel_container)
+        panel_layout.setContentsMargins(0, 0, 0, 0)
+        panel_layout.setSpacing(0)
+        
+        # Barra superior com título e botão de toggle
+        header_bar = QWidget()
+        header_bar.setFixedHeight(40)
+        header_bar.setStyleSheet("""
+            QWidget {
+                background-color: #008080;
+                border-top-left-radius: 10px;
+                border-top-right-radius: 10px;
+            }
+        """)
+        header_layout = QHBoxLayout(header_bar)
+        header_layout.setContentsMargins(15, 0, 15, 0)
+        
+        # Título "History"
+        history_title = QLabel("History")
+        history_title.setStyleSheet("""
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        """)
+        header_layout.addWidget(history_title)
+        header_layout.addStretch()
+        
+        # Botão de toggle (setinha)
+        self.toggle_btn = QPushButton()
+        self.toggle_btn.setFixedSize(30, 30)
+        
+        # Carregar ícone para baixo (já que vai começar fechado)
+        toggle_icon = QIcon("images/icons/down_icon.png")
+        self.toggle_btn.setIcon(toggle_icon)
+        self.toggle_btn.setIconSize(self.toggle_btn.size())
+        self.toggle_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                border: none;
+            }   
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+            }
+        """)
+
+        self.toggle_btn.clicked.connect(self.toggle_history)
+        header_layout.addWidget(self.toggle_btn)
+
+        # Conteúdo do histórico (inicializar como oculto)
+        self.history_content = self.create_history_content()
+        self.history_content.setFixedHeight(500)
+        self.history_content.hide()  # Começa oculto
+        
+        # Adicionar ao layout
+        panel_layout.addWidget(header_bar)
+        panel_layout.addWidget(self.history_content)
+        
+        return panel_container
+
+    # Cria o conteúdo do histórico com cards de arquivos
+    def create_history_content(self):
+        content_widget = QWidget()
+        content_widget.setStyleSheet("""
+            QWidget {
+                background-color: white;
+                border-bottom-left-radius: 10px;
+                border-bottom-right-radius: 10px;
+            }
+        """)
+        layout = QVBoxLayout(content_widget)
+        layout.setContentsMargins(20, 15, 20, 15)
+        layout.setSpacing(10)
+
+        # Container com scroll para os cards
+        from PySide6.QtWidgets import QScrollArea
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background: transparent;
+            }
+            QScrollBar:vertical {
+                background: #f0f0f0;
+                width: 8px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #cccccc;
+                border-radius: 4px;
+            }
+        """)
+
+        # Widget interno do scroll
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setSpacing(10)
+        scroll_layout.setContentsMargins(0, 0, 10, 0)
+
+        # Criar cards de exemplo
+        example_files = [
+            {
+                "title": "asdasdasdasdasdasd",
+                "format": "MP4 - 1080P",
+                "time": "01:00",
+                "size": "450Mb"
+            },
+            {
+                "title": "Another Video File",
+                "format": "MP3 - 320kbps",
+                "time": "03:45",
+                "size": "8.5Mb"
+            },
+            {
+                "title": "Tutorial Video",
+                "format": "MP4 - 720P",
+                "time": "12:30",
+                "size": "256Mb"
+            }
+        ]
+
+        for file_data in example_files:
+            card = self.create_file_card(file_data)
+            scroll_layout.addWidget(card)
+
+        scroll_layout.addStretch()
+        scroll_area.setWidget(scroll_widget)
+        layout.addWidget(scroll_area)
+
+        return content_widget
+
+    # Cria um card individual para cada arquivo no histórico
+    def create_file_card(self, file_data):
+        """Cria um card individual para cada arquivo"""
+        card = QWidget()
+        card.setFixedHeight(80)
+        card.setStyleSheet("""
+            QWidget {
+                background-color: #f8f9fa;
+                border-radius: 8px;
+                border: 1px solid #e9ecef;
+            }
+            QWidget:hover {
+                background-color: #e9ecef;
+            }
+        """)
+        
+        layout = QHBoxLayout(card)
+        layout.setContentsMargins(15, 10, 15, 10)
+        layout.setSpacing(15)
+
+        # Ícone de play
+        play_icon = QLabel()
+        play_icon.setFixedSize(50, 50)
+        play_icon.setStyleSheet("""
+            QLabel {
+                background-color: #6c757d;
+                border-radius: 25px;
+                color: white;
+                font-size: 20px;
+            }
+        """)
+        play_icon.setAlignment(Qt.AlignCenter)
+        play_icon.setText("▶")
+        layout.addWidget(play_icon)
+
+        # Informações do arquivo
+        info_layout = QVBoxLayout()
+        info_layout.setSpacing(2)
+
+        # Título
+        title_label = QLabel(file_data["title"])
+        title_label.setStyleSheet("""
+            QLabel {
+                font-size: 14px;
+                font-weight: bold;
+                color: #212529;
+            }
+        """)
+        
+        # Formato e detalhes
+        details_label = QLabel(f"{file_data['format']} • Time: {file_data['time']} • Size: {file_data['size']}")
+        details_label.setStyleSheet("""
+            QLabel {
+                font-size: 12px;
+                color: #6c757d;
+            }
+        """)
+
+        info_layout.addWidget(title_label)
+        info_layout.addWidget(details_label)
+        info_layout.addStretch()
+
+        layout.addLayout(info_layout)
+        layout.addStretch()
+
+        # Botão de deletar
+        delete_btn = QPushButton("🗑️")
+        delete_btn.setFixedSize(30, 30)
+        delete_btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                border: none;
+                font-size: 16px;
+                border-radius: 15px;
+            }
+            QPushButton:hover {
+                background-color: #dc3545;
+                color: white;
+            }
+        """)
+        layout.addWidget(delete_btn)
+
+        return card
+    
+    # Alterna visibilidade do painel de histórico
+    def toggle_history(self):
+        if self.history_content.isVisible():
+            self.history_content.hide()
+            # Trocar para imagem de seta para baixo
+            down_icon = QIcon("images/icons/up_icon.png")  # Substitua pelo caminho da sua imagem
+            self.toggle_btn.setIcon(down_icon)
+        else:
+            self.history_content.show()
+            # Trocar para imagem de seta para cima
+            up_icon = QIcon("images/icons/down_icon.png")  # Substitua pelo caminho da sua imagem
+            self.toggle_btn.setIcon(up_icon)
 
     # Cria a aba inicial com o botão "Paste Here"
     def create_home_tab(self):
@@ -394,6 +628,80 @@ class MediaDownloaderPro(QWidget):
         benefit_layout.addLayout(right_benefits)
         layout.addWidget(benefit_box)
 
+        return tab
+
+    # Cria a aba de histórico com tabela de downloads
+    def create_history_tab(self):
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(18)
+
+        # Search bar
+        search_row = QHBoxLayout()
+        search_input = QLineEdit()
+        search_input.setPlaceholderText("Search by title...")
+        search_input.setFixedHeight(32)
+        search_row.addWidget(search_input)
+        search_row.addStretch()
+        layout.addLayout(search_row)
+
+        # Table
+        table = QTableWidget(0, 4)  # 4 columns: File Name, Type, Progress, Actions
+        table.setHorizontalHeaderLabels(["File Name", "Type", "Progress", "Actions"])
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        table.setStyleSheet("""
+            QTableWidget {
+                background: #fff;
+                border-radius: 10px;
+                font-size: 14px;
+            }
+            QHeaderView::section {
+                background: #f8f8f8;
+                font-weight: bold;
+                border: none;
+                padding: 8px;
+            }
+            QTableWidget::item {
+                padding: 8px;
+            }
+        """)
+        table.verticalHeader().setVisible(False)
+        table.setShowGrid(False)
+        table.setAlternatingRowColors(True)
+        table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        table.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        # Exemplo de dados (adicione dinamicamente conforme seu app)
+        example_data = [
+            {"name": "How to Create Amazing UI Designs", "type": "Video", "progress": 100},
+            {"name": "Summer Vibes - Chill Mix", "type": "Audio", "progress": 100},
+            {"name": "Dance Tutorial - Beginner Level", "type": "Video", "progress": 60},
+        ]
+        for row, item in enumerate(example_data):
+            table.insertRow(row)
+            table.setItem(row, 0, QTableWidgetItem(item["name"]))
+            table.setItem(row, 1, QTableWidgetItem(item["type"]))
+            # Progress bar
+            progress = QProgressBar()
+            progress.setValue(item["progress"])
+            progress.setTextVisible(item["progress"] < 100)
+            table.setCellWidget(row, 2, progress)
+            # Actions (exemplo: botão de deletar com ícone)
+            actions_widget = QWidget()
+            actions_layout = QHBoxLayout(actions_widget)
+            actions_layout.setContentsMargins(0, 0, 0, 0)
+            actions_layout.setSpacing(4)
+            delete_btn = QPushButton()
+            # delete_btn.setIcon(QIcon(TablerIcons.load(OutlineIcon.TRASH)))
+            delete_btn.setFixedSize(28, 28)
+            delete_btn.setStyleSheet("border: none; background: transparent; font-size: 16px;")
+            actions_layout.addWidget(delete_btn)
+            actions_layout.addStretch()
+            table.setCellWidget(row, 3, actions_widget)
+
+        layout.addWidget(table)
+        layout.addStretch()
         return tab
 
     # Detecta o link e abre a janela de download
