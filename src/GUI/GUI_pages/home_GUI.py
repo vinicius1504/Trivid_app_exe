@@ -179,18 +179,7 @@ class MediaDownloaderPro(QWidget):
         # Widget container para o conteúdo do botão
         btn_container = QWidget()
         btn_container.setLayout(btn_content)
-        paste_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #008080;
-                border: none;
-                border-radius: 7px;
-            }
-            QPushButton:hover {
-                background-color: #006666;
-            }
-        """)
-
-        # Define o widget de conteúdo como o layout do botão
+        paste_btn.setStyleSheet(HomeStyleSheet.paste_button_style())
         paste_btn.setLayout(btn_content)
         paste_btn.clicked.connect(self.paste_and_detect)
 
@@ -235,13 +224,9 @@ class MediaDownloaderPro(QWidget):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(20)
 
-
         # ==== Account Info Section (com Grid) ====
         account_box = QWidget()
-        account_box.setStyleSheet("""
-            background-color: white;
-            border-radius: 10px;
-        """)
+        account_box.setStyleSheet(HomeStyleSheet.account_box_style())
         account_layout = QGridLayout(account_box)
         account_layout.setContentsMargins(20, 20, 20, 20)
         account_layout.setHorizontalSpacing(40)
@@ -256,31 +241,14 @@ class MediaDownloaderPro(QWidget):
         # Linha 2: Account Status, Renewal Date
         account_layout.addWidget(QLabel("Account Status:"), 1, 0, alignment=Qt.AlignRight)
         status_badge = QLabel("Premium")
-        status_badge.setStyleSheet("""
-            background-color: #d1fae5;
-            color: #065f46;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-        """)
+        status_badge.setStyleSheet(HomeStyleSheet.status_badge_style())
         account_layout.addWidget(status_badge, 1, 1)
         account_layout.addWidget(QLabel("Renewal Date:"), 1, 2, alignment=Qt.AlignRight)
         account_layout.addWidget(QLabel("December 15, 2023"), 1, 3)
 
         # Linha 3: Botão somente no lado esquerdo
         manage_btn = QPushButton("Manage Subscription")
-        manage_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #006666;
-                color: white;
-                padding: 10px 18px;
-                border-radius: 6px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #004d4d;
-            }
-        """)
+        manage_btn.setStyleSheet(HomeStyleSheet.manage_subscription_button_style())
         account_layout.addWidget(manage_btn, 2, 1, alignment=Qt.AlignRight)
 
         # Adiciona o box ao layout principal da aba
@@ -289,10 +257,7 @@ class MediaDownloaderPro(QWidget):
 
         # ==== Plan Benefits Section ====
         benefit_box = QWidget()
-        benefit_box.setStyleSheet("""
-            background-color: white;
-            border-radius: 10px;
-        """)
+        benefit_box.setStyleSheet(HomeStyleSheet.benefit_box_style())
         benefit_layout = QHBoxLayout(benefit_box)
         benefit_layout.setContentsMargins(20, 20, 20, 20)
         benefit_layout.setSpacing(40)

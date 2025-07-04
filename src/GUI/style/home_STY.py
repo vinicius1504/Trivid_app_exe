@@ -182,3 +182,11 @@ class HomeStyleSheet:
     def icon_transparent_style():
         """Estilo para ícones com fundo transparente"""
         return "background: transparent;"
+    
+    @staticmethod
+    def benefit_box_style():
+        """Estilo para ícones com fundo transparente"""
+        return """
+            background-color: white;
+            border-radius: 10px;
+        """
