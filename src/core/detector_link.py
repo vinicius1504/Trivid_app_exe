@@ -62,7 +62,7 @@ def get_platform_info(platform):
             'name': 'YouTube',
             'icon': '🎥',
             'color': '#FF0000',
-            'button_color': '#008080'
+            'button_color': "#850000"
         },
         'twitch': {
             'name': 'Twitch',

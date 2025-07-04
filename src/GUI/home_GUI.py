@@ -10,6 +10,7 @@ import sys
 from src.GUI.download_GUI import MainWindow as DownloadWindow
 from src.GUI.history_GUI import HistoryPanel
 from src.core.detector_link import detect_platform, is_valid_url
+from src.GUI.style.home_STY import HomeStyleSheet
 
 
 
@@ -21,62 +22,14 @@ class MediaDownloaderPro(QWidget):
         self.setFixedSize(800, 500)
         self.setWindowFlag(Qt.FramelessWindowHint)  # Remove barra padrão
         self.setWindowIcon(QIcon("app_copy copy 2\images\icon.png"))
-        self.setStyleSheet("""
-            QWidget {
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-size: 15px;
-                background-color: #f5f5f5;
-            }
-            QLabel {
-                font-weight: 500;
-                margin-bottom: 0px;
-            }
-            
-            QTabWidget::pane {
-            border: none;
-            background-color: #f5f5f5;
-     }
-
-            QLineEdit {
-                padding: 8px;
-                border: 1px solid #cccccc;
-                border-radius: 7px;
-                background: #e9e9e9;
-                color: #888;
-                font-size: 15px;
-            }
-            QLineEdit:focus {
-                outline: none;
-                border: 1.5px solid #008080;
-                background: #f8f8f8;
-                color: #222;
-            }
-            QPushButton {
-                padding: 10px 28px;
-                background-color: #008080;
-                color: white;
-                border: none;
-                border-radius: 7px;
-                font-size: 15px;
-                font-weight: 500;
-            }
-            QPushButton:hover {
-                background-color: #006666;
-            }
-            QTabBar::tab {
-                padding: 10px 20px;
-                background: #f8f8f8;
-                border-bottom: 2px solid transparent;
-                color: #666666;
-            }
-            QTabBar::tab:selected {
-                border-bottom: 2px solid #008080;
-                color: #008080;
-                font-weight: bold;
-                color: #343434;
-
-            }
-        """)
+        
+        # Aplicar estilos separados
+        self.setStyleSheet(
+            HomeStyleSheet.main_widget_style() + 
+            HomeStyleSheet.tab_widget_style() + 
+            HomeStyleSheet.line_edit_style() + 
+            HomeStyleSheet.primary_button_style()
+        )
         # Barra personalizada no topo
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -94,9 +47,7 @@ class MediaDownloaderPro(QWidget):
     def create_title_bar(self): 
         bar = QWidget()
         bar.setFixedHeight(30)
-        bar.setStyleSheet("""
-            background: #01716F;
-        """)
+        bar.setStyleSheet(HomeStyleSheet.title_bar_style())
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(8, 0, 8, 0)
         layout.setSpacing(10)  # Menor espaçamento para não empurrar os botões
@@ -117,59 +68,31 @@ class MediaDownloaderPro(QWidget):
 
         # Botão minimizar com ícone
         btn_min = QPushButton()
-        btn_min.setFixedSize(20, 20)  # Aumentei um pouco para acomodar a imagem
-
-        # Carregar e definir ícone
-        min_icon = QIcon("images/icons/minimize_icon.png")  # Substitua pelo caminho da sua imagem
+        btn_min.setFixedSize(20, 20)
+        min_icon = QIcon("images/icons/minimize_icon.png")
         btn_min.setIcon(min_icon)
         btn_min.setIconSize(btn_min.size())
-        btn_min.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-            }
-            QPushButton:hover {
-                background: rgba(255, 255, 255, 0.2);
-            }
-        """)
+        btn_min.setStyleSheet(HomeStyleSheet.title_bar_button_style())
         btn_min.clicked.connect(self.showMinimized)
         layout.addWidget(btn_min)
 
         # Botão maximizar com ícone
         btn_max = QPushButton()
         btn_max.setFixedSize(18, 18)
-        # Carregar e definir ícone
-        max_icon = QIcon("images/icons/maximize_icon.png")  # Substitua pelo caminho da sua imagem
+        max_icon = QIcon("images/icons/maximize_icon.png")
         btn_max.setIcon(max_icon)
         btn_max.setIconSize(btn_max.size())      
-        btn_max.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-            }
-            QPushButton:hover {
-                background: rgba(255, 255, 255, 0.2);
-            }
-        """)
+        btn_max.setStyleSheet(HomeStyleSheet.title_bar_button_style())
         btn_max.clicked.connect(self.toggle_max_restore)
         layout.addWidget(btn_max)
 
         # Botão fechar com ícone
         btn_close = QPushButton()
         btn_close.setFixedSize(20, 20) 
-        # Carregar e definir ícone
-        close_icon = QIcon("images/icons/close_icon.png")  # Substitua pelo caminho da sua imagem
+        close_icon = QIcon("images/icons/close_icon.png")
         btn_close.setIcon(close_icon)
         btn_close.setIconSize(btn_close.size()) 
-        btn_close.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-            }
-            QPushButton:hover {
-                background: rgba(255, 255, 255, 0.2);
-            }
-        """)
+        btn_close.setStyleSheet(HomeStyleSheet.title_bar_button_style())
         btn_close.clicked.connect(self.close)
         layout.addWidget(btn_close)
 
@@ -226,13 +149,7 @@ class MediaDownloaderPro(QWidget):
         # Label do texto
         label = QLabel("Click and paste the link here")
         label.setAlignment(Qt.AlignCenter)
-        label.setStyleSheet("""
-            QLabel {
-                font-size: 16px;
-                color: #666;
-                margin-top: 10px;
-            }
-        """)
+        label.setStyleSheet(HomeStyleSheet.home_label_style())
         
         # Botão Paste Here com ícone
         paste_btn = QPushButton()
@@ -245,14 +162,14 @@ class MediaDownloaderPro(QWidget):
 
         # Ícone no botão
         icon_label = QLabel()
-        icon_pixmap = QPixmap("images/icons/paste_icon.png")  # Substitua pelo caminho do seu ícone
+        icon_pixmap = QPixmap("images/icons/paste_icon.png")
         icon_label.setPixmap(icon_pixmap.scaled(20, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        icon_label.setStyleSheet("background: transparent;")
+        icon_label.setStyleSheet(HomeStyleSheet.icon_transparent_style())
 
         # Texto do botão
         text_label = QLabel("Paste Here")
-        text_label.setStyleSheet("color: white; background: transparent; font-weight: 500;")
-
+        text_label.setStyleSheet(HomeStyleSheet.paste_button_text_style())
+        
         # Adiciona ícone e texto ao layout do botão
         btn_content.addStretch()
         btn_content.addWidget(icon_label)

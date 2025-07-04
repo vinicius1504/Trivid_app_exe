@@ -12,7 +12,7 @@ from pytubefix import YouTube
 from src.core.downloders.youtube_downloader import baixar_video_audio_mesclar, baixar_audio, baixar_thumbnail
 from src.core.downloders.twitch_downloader import baixar_video_twitch, baixar_audio_twitch, baixar_thumbnail_twitch, obter_info_twitch
 from src.core.detector_link import get_platform_info
-
+from src.GUI.style.download_STY import StyleSheet
 
 class MainWindow(QMainWindow):
 
@@ -74,35 +74,9 @@ class MainWindow(QMainWindow):
         download_btn = QPushButton("Download")
         cancel_btn = QPushButton("Cancel")
         
-        # Usar cor da plataforma para o botão
-        btn_style = f"""
-            QPushButton {{  
-                background-color: {self.platform_info['color']};
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 24px;
-                font-size: 15px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: {self.platform_info['color']}CC;
-            }}
-        """
-        download_btn.setStyleSheet(btn_style)
-        cancel_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #f5f5f5;
-                color: #333;
-                border: 1px solid #bbb;
-                border-radius: 6px;
-                padding: 10px 24px;
-                font-size: 15px;
-            }
-            QPushButton:hover {
-                background-color: #e0e0e0;
-            }
-        """)
+        # Usar estilo separado
+        download_btn.setStyleSheet(StyleSheet.primary_button_style(self.platform_info['color']))
+        cancel_btn.setStyleSheet(StyleSheet.secondary_button_style())
         
         layout.addStretch()
         layout.addWidget(cancel_btn)
@@ -298,7 +272,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         
         title_label = QLabel("Select content type:")
-        title_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+        title_label.setStyleSheet(StyleSheet.label_title_style())
         layout.addWidget(title_label)
         
         radio_layout = QHBoxLayout()
@@ -307,6 +281,12 @@ class MainWindow(QMainWindow):
         video_radio = QRadioButton("Video")
         audio_radio = QRadioButton("Audio")
         image_radio = QRadioButton("Image")
+        
+        # Usar estilo separado
+        radio_style = StyleSheet.radio_button_style()
+        video_radio.setStyleSheet(radio_style)
+        audio_radio.setStyleSheet(radio_style)
+        image_radio.setStyleSheet(radio_style)
         
         # Para Spotify, desabilitar vídeo por padrão
         if self.platform == 'spotify':
@@ -375,14 +355,16 @@ class MainWindow(QMainWindow):
         # Resolução
         resolution_layout = QVBoxLayout()
         resolution_label = QLabel("Resolution")
-        resolution_label.setStyleSheet("font-weight: bold;")
+        resolution_label.setStyleSheet(StyleSheet.label_bold_style())
         self.resolution_combo = QComboBox()  # Tornar atributo da classe
         
         if self.platform == 'youtube' and self.yt:
             # Carregar resoluções disponíveis do vídeo
             try:
                 from src.core.downloders.youtube_downloader import listar_resolucoes_disponiveis
-                resolutions = listar_resolucoes_disponiveis(self.video_url)
+                resolution = listar_resolucoes_disponiveis(self.video_url)
+                resolutions = resolution[::-1] #reversa a lista para mostrar as resoluções mais altas primeiro
+                print(f"Resoluções disponíveis: {resolutions}")
                 if resolutions:
                     self.resolution_combo.addItems(resolutions)
                 else:
@@ -406,7 +388,7 @@ class MainWindow(QMainWindow):
         # Formato
         format_layout = QVBoxLayout()
         format_label = QLabel("Format")
-        format_label.setStyleSheet("font-weight: bold;")
+        format_label.setStyleSheet(StyleSheet.label_bold_style())
         self.video_format_combo = QComboBox()  # Tornar atributo da classe
         self.video_format_combo.addItems(["MP4", "MKV", "AVI", "WEBM"])
         self.video_format_combo.setFixedWidth(120)
@@ -477,7 +459,7 @@ class MainWindow(QMainWindow):
     def create_destination_section(self):
         layout = QVBoxLayout()
         title_label = QLabel("Destination Folder")
-        title_label.setStyleSheet("font-weight: bold; margin-top: 20px;")
+        title_label.setStyleSheet(StyleSheet.label_title_style())
         layout.addWidget(title_label)
 
         folder_layout = QHBoxLayout()
@@ -485,17 +467,7 @@ class MainWindow(QMainWindow):
         self.folder_input.setFixedHeight(35)
         browse_button = QPushButton("Browse")
         browse_button.setFixedSize(80, 35)
-        browse_button.setStyleSheet("""
-            QPushButton {
-                background-color: #f0f0f0;
-                border: 1px solid #ccc;
-                border-radius: 3px;
-            }
-            QPushButton:hover {
-                background-color: #e0e0e0;
-            }
-        """)
-
+        browse_button.setStyleSheet(StyleSheet.browse_button_style())
         browse_button.clicked.connect(self.browse_folder)
 
         folder_layout.addWidget(self.folder_input)
