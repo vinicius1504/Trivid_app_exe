@@ -7,8 +7,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon, QPixmap, QMouseEvent,QGuiApplication
 from PySide6.QtCore import Qt
 import sys
-from src.GUI.download_GUI import MainWindow as DownloadWindow
-from src.GUI.history_GUI import HistoryPanel
+from src.GUI.GUI_pages.download_GUI import MainWindow as DownloadWindow
+from src.GUI.GUI_pages.history_GUI import HistoryPanel
 from src.core.detector_link import detect_platform, is_valid_url
 from src.GUI.style.home_STY import HomeStyleSheet
 
@@ -19,7 +19,7 @@ class MediaDownloaderPro(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("TriviD")
-        self.setFixedSize(800, 500)
+        self.setFixedSize(800, 600)
         self.setWindowFlag(Qt.FramelessWindowHint)  # Remove barra padrão
         self.setWindowIcon(QIcon("app_copy copy 2\images\icon.png"))
         

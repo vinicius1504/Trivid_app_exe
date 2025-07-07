@@ -1,13 +1,16 @@
 class StyleSheet:
     """Classe para centralizar todos os estilos da aplicação"""
     
-    # Cores da aplicação
-    PRIMARY_COLOR = "#006666"
-    SECONDARY_COLOR = "#008080"
-    HOVER_COLOR = "#004d4d"
+    # Cores principais da aplicação
+    PRIMARY_COLOR = "#008080"
+    PRIMARY_HOVER = "#006666"
+    SECONDARY_COLOR = "#01716F"
     BACKGROUND_COLOR = "#f5f5f5"
-    TEXT_COLOR = "#333"
-    BORDER_COLOR = "#ccc"
+    WHITE_COLOR = "#ffffff"
+    TEXT_COLOR = "#666"
+    DARK_TEXT = "#343434"
+    BORDER_COLOR = "#cccccc"
+    FOCUS_COLOR = "#008080"
     
     @staticmethod
     def radio_button_style():

@@ -1,12 +1,14 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea, QGridLayout
 )
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtCore import Qt
+from src.GUI.style.history_STY import HistoryStyleSheet
 
 class HistoryPanel(QWidget):
     def __init__(self):
         super().__init__()
+        self.is_two_columns = True  # Controla se exibe em 1 ou 2 colunas
         self.setup_panel()
     
     def setup_panel(self):
@@ -29,42 +31,34 @@ class HistoryPanel(QWidget):
     def create_header_bar(self):
         header_bar = QWidget()
         header_bar.setFixedHeight(40)
-        header_bar.setStyleSheet("""
-            QWidget {
-                background-color: #008080;
-                border-top-left-radius: 10px;
-                border-top-right-radius: 10px;
-            }
-        """)
+        header_bar.setStyleSheet(HistoryStyleSheet.header_bar_style())
         header_layout = QHBoxLayout(header_bar)
         header_layout.setContentsMargins(15, 0, 15, 0)
         
         # Título "History"
         history_title = QLabel("History")
-        history_title.setStyleSheet("""
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-        """)
+        history_title.setStyleSheet(HistoryStyleSheet.history_title_style())
         header_layout.addWidget(history_title)
         header_layout.addStretch()
         
-        # Botão de toggle
+        # Botão para alternar entre 1 e 2 colunas (ícone)
+        self.toggle_columns_btn = QPushButton()
+        self.toggle_columns_btn.setFixedSize(30, 30)
+        # Ícone para alternar colunas - você pode usar grid_icon.png ou columns_icon.png
+        columns_icon = QIcon("images/icons/table_icon.png")  # Coloque seu ícone aqui
+        self.toggle_columns_btn.setIcon(columns_icon)
+        self.toggle_columns_btn.setIconSize(self.toggle_columns_btn.size())
+        self.toggle_columns_btn.setStyleSheet(HistoryStyleSheet.toggle_button_style())
+        self.toggle_columns_btn.clicked.connect(self.toggle_columns)
+        header_layout.addWidget(self.toggle_columns_btn)
+        
+        # Botão de toggle (expandir/recolher)
         self.toggle_btn = QPushButton()
         self.toggle_btn.setFixedSize(30, 30)
         toggle_icon = QIcon("images/icons/down_icon.png")
         self.toggle_btn.setIcon(toggle_icon)
         self.toggle_btn.setIconSize(self.toggle_btn.size())
-        self.toggle_btn.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-            }   
-            QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.1);
-                border-radius: 15px;
-            }
-        """)
+        self.toggle_btn.setStyleSheet(HistoryStyleSheet.toggle_button_style())
         self.toggle_btn.clicked.connect(self.toggle_history)
         header_layout.addWidget(self.toggle_btn)
         
@@ -72,46 +66,45 @@ class HistoryPanel(QWidget):
     
     def create_history_content(self):
         content_widget = QWidget()
-        content_widget.setStyleSheet("""
-            QWidget {
-                background-color: white;
-                border-bottom-left-radius: 10px;
-                border-bottom-right-radius: 10px;
-            }
-        """)
+        content_widget.setStyleSheet(HistoryStyleSheet.history_content_style())
         layout = QVBoxLayout(content_widget)
         layout.setContentsMargins(20, 15, 20, 15)
         layout.setSpacing(10)
 
         # Container com scroll para os cards
-        from PySide6.QtWidgets import QScrollArea
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        scroll_area.setStyleSheet("""
-            QScrollArea {
-                border: none;
-                background: transparent;
-            }
-            QScrollBar:vertical {
-                background: #f0f0f0;
-                width: 8px;
-                border-radius: 4px;
-            }
-            QScrollBar::handle:vertical {
-                background: #cccccc;
-                border-radius: 4px;
-            }
-        """)
+        scroll_area.setStyleSheet(HistoryStyleSheet.scroll_area_style())
 
         # Widget interno do scroll
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout(scroll_widget)
-        scroll_layout.setSpacing(10)
-        scroll_layout.setContentsMargins(0, 0, 10, 0)
+        self.scroll_widget = QWidget()
+        self.create_cards_layout()
 
-        # Criar cards de exemplo
+        scroll_area.setWidget(self.scroll_widget)
+        layout.addWidget(scroll_area)
+
+        return content_widget
+    
+    def create_cards_layout(self):
+        """Cria o layout dos cards baseado no modo (1 ou 2 colunas)"""
+        # Limpar layout existente
+        if self.scroll_widget.layout():
+            QWidget().setLayout(self.scroll_widget.layout())
+        
+        if self.is_two_columns:
+            # Layout em grid (2 colunas)
+            grid_layout = QGridLayout(self.scroll_widget)
+            grid_layout.setSpacing(10)
+            grid_layout.setContentsMargins(0, 0, 10, 0)
+        else:
+            # Layout vertical (1 coluna)
+            grid_layout = QVBoxLayout(self.scroll_widget)
+            grid_layout.setSpacing(10)
+            grid_layout.setContentsMargins(0, 0, 10, 0)
+
+        # Dados de exemplo
         example_files = [
             {
                 "title": "asdasdasdasdasdasd",
@@ -119,112 +112,144 @@ class HistoryPanel(QWidget):
                 "time": "01:00",
                 "size": "450Mb"
             },
+                        {
+                "title": "asdasdasdasdasdasd",
+                "format": "MP4 - 1080P",
+                "time": "01:00",
+                "size": "450Mb"
+            },
+                        {
+                "title": "asdasdasdasdasdasd",
+                "format": "MP4 - 1080P",
+                "time": "01:00",
+                "size": "450Mb"
+            },
+                        {
+                "title": "asdasdasdasdasdasd",
+                "format": "MP4 - 1080P",
+                "time": "01:00",
+                "size": "450Mb"
+            },
             {
                 "title": "Another Video File",
-                "format": "MP3 - 320kbps",
+                "format": "MP3 - 320kbps", 
                 "time": "03:45",
                 "size": "8.5Mb"
             },
             {
                 "title": "Tutorial Video",
                 "format": "MP4 - 720P",
-                "time": "12:30",
+                "time": "12:30", 
                 "size": "256Mb"
+            },
+            {
+                "title": "Music Track",
+                "format": "MP3 - 256kbps",
+                "time": "04:20",
+                "size": "6.2Mb"
             }
         ]
 
-        for file_data in example_files:
+        # Adicionar cards ao layout
+        for i, file_data in enumerate(example_files):
             card = self.create_file_card(file_data)
-            scroll_layout.addWidget(card)
+            
+            if self.is_two_columns:
+                row = i // 2
+                col = i % 2
+                grid_layout.addWidget(card, row, col)
+            else:
+                grid_layout.addWidget(card)
 
-        scroll_layout.addStretch()
-        scroll_area.setWidget(scroll_widget)
-        layout.addWidget(scroll_area)
-
-        return content_widget
+        if self.is_two_columns:
+            # Adicionar stretch no final para grid
+            grid_layout.setRowStretch(grid_layout.rowCount(), 1)
+        else:
+            # Adicionar stretch no final para layout vertical
+            grid_layout.addStretch()
     
     def create_file_card(self, file_data):
         """Cria um card individual para cada arquivo"""
         card = QWidget()
-        card.setFixedHeight(80)
-        card.setStyleSheet("""
-            QWidget {
-                background-color: #f8f9fa;
-                border-radius: 8px;
-                border: 1px solid #e9ecef;
-            }
-            QWidget:hover {
-                background-color: #e9ecef;
-            }
-        """)
+        card.setFixedHeight(70)  # Altura ajustada
+        card.setStyleSheet(HistoryStyleSheet.file_card_style())
         
         layout = QHBoxLayout(card)
         layout.setContentsMargins(15, 10, 15, 10)
         layout.setSpacing(15)
 
-        # Ícone de play
+        # Ícone de play com imagem
         play_icon = QLabel()
         play_icon.setFixedSize(50, 50)
-        play_icon.setStyleSheet("""
-            QLabel {
-                background-color: #6c757d;
-                border-radius: 25px;
-                color: white;
-                font-size: 20px;
-            }
-        """)
+        play_icon.setStyleSheet(HistoryStyleSheet.play_icon_style())
+        
+        # Carregar ícone da pasta
+        pixmap = QPixmap("images/icons/play_icon.png")
+        if not pixmap.isNull():
+            play_icon.setPixmap(pixmap.scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        else:
+            play_icon.setText("▶")
+        
         play_icon.setAlignment(Qt.AlignCenter)
-        play_icon.setText("▶")
         layout.addWidget(play_icon)
 
-        # Informações do arquivo
+        # Informações do arquivo - Layout vertical
         info_layout = QVBoxLayout()
         info_layout.setSpacing(2)
+        info_layout.setContentsMargins(0, 0, 0, 0)
 
         # Título
         title_label = QLabel(file_data["title"])
-        title_label.setStyleSheet("""
-            QLabel {
-                font-size: 14px;
-                font-weight: bold;
-                color: #212529;
-            }
-        """)
-        
-        # Formato e detalhes
-        details_label = QLabel(f"{file_data['format']} • Time: {file_data['time']} • Size: {file_data['size']}")
-        details_label.setStyleSheet("""
-            QLabel {
-                font-size: 12px;
-                color: #6c757d;
-            }
-        """)
-
+        title_label.setStyleSheet(HistoryStyleSheet.file_title_style())
         info_layout.addWidget(title_label)
-        info_layout.addWidget(details_label)
-        info_layout.addStretch()
-
+        
+        # Linha com formato e tempo
+        first_line = QHBoxLayout()
+        first_line.setSpacing(20)
+        first_line.setContentsMargins(0, 0, 0, 0)
+        
+        format_label = QLabel(file_data['format'])
+        format_label.setStyleSheet(HistoryStyleSheet.file_details_style())
+        
+        time_label = QLabel(f"Time: {file_data['time']}")
+        time_label.setStyleSheet(HistoryStyleSheet.file_details_style())
+        
+        first_line.addWidget(format_label)
+        first_line.addWidget(time_label)
+        first_line.addStretch()
+        
+        # Linha com tamanho
+        size_label = QLabel(f"Size: {file_data['size']}")
+        size_label.setStyleSheet(HistoryStyleSheet.file_details_style())
+        
+        info_layout.addLayout(first_line)
+        info_layout.addWidget(size_label)
+        
         layout.addLayout(info_layout)
         layout.addStretch()
 
-        # Botão de deletar
-        delete_btn = QPushButton("🗑️")
+        # Botão de deletar com ícone
+        delete_btn = QPushButton()
         delete_btn.setFixedSize(30, 30)
-        delete_btn.setStyleSheet("""
-            QPushButton {
-                background: transparent;
-                border: none;
-                font-size: 16px;
-                border-radius: 15px;
-            }
-            QPushButton:hover {
-                background-color: #dc3545;
-                color: white;
-            }
-        """)
+        
+        # Carregar ícone da lixeira
+        delete_pixmap = QPixmap("images/icons/delete_icon.png")
+        if not delete_pixmap.isNull():
+            delete_icon = QIcon(delete_pixmap)
+            delete_btn.setIcon(delete_icon)
+            delete_btn.setIconSize(delete_btn.size())
+        else:
+            delete_btn.setText("🗑️")
+            
+        delete_btn.setStyleSheet(HistoryStyleSheet.delete_button_style())
         layout.addWidget(delete_btn)
 
         return card
+    
+    def toggle_columns(self):
+        """Alterna entre layout de 1 e 2 colunas"""
+        self.is_two_columns = not self.is_two_columns
+        self.create_cards_layout()
     
     def toggle_history(self):
         if self.history_content.isVisible():
@@ -234,4 +259,5 @@ class HistoryPanel(QWidget):
         else:
             self.history_content.show()
             up_icon = QIcon("images/icons/down_icon.png")
+
             self.toggle_btn.setIcon(up_icon)

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QApplication
 import sys
-from src.GUI.home_GUI import MediaDownloaderPro  # Importa sua interface principal
+from src.GUI.GUI_pages.home_GUI import MediaDownloaderPro  # Importa sua interface principal
 
 def main():
     app = QApplication(sys.argv)  # Inicia o app Qt
