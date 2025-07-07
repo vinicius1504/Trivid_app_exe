@@ -17,6 +17,8 @@ class HistoryStyleSheet:
     DELETE_HOVER = "#dc3545"      # Cor vermelha para botão deletar
     ICON_BG = "#6c757d"           # Cor de fundo dos ícones (cinza)
     
+
+
     @staticmethod
     def header_bar_style():
         """Barra superior do painel - cor de fundo e bordas arredondadas superiores"""
@@ -61,6 +63,8 @@ class HistoryStyleSheet:
                 background-color: {HistoryStyleSheet.WHITE_COLOR};  /* Fundo branco */
                 border-bottom-left-radius: 10px;   /* Borda arredondada inferior esquerda */
                 border-bottom-right-radius: 10px;  /* Borda arredondada inferior direita */
+                height: 250px;            /* Altura total do container */
+                border: 1px solid black;  /* Borda cinza clara */
             }}
         """
     
@@ -129,7 +133,7 @@ class HistoryStyleSheet:
                 font-size: 12px;          /* Fonte pequena */
                 color: {HistoryStyleSheet.ICON_BG};  /* Cor cinza */
                 margin: 0px;              /* Sem margens */
-                padding: 5px;            /* Sem padding */
+                padding: 0px;            /* Sem padding */
             }}
         """
 

@@ -19,7 +19,7 @@ class MediaDownloaderPro(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("TriviD")
-        self.setFixedSize(800, 600)
+        self.setFixedSize(800, 550)
         self.setWindowFlag(Qt.FramelessWindowHint)  # Remove barra padrão
         self.setWindowIcon(QIcon("app_copy copy 2\images\icon.png"))
         

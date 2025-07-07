@@ -78,6 +78,9 @@ class HistoryPanel(QWidget):
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setStyleSheet(HistoryStyleSheet.scroll_area_style())
 
+        # Definir altura fixa para a área de scroll
+        # scroll_area.setFixedHeight(250)  # Altura para mostrar ~4 cards em 2 colunas
+
         # Widget interno do scroll
         self.scroll_widget = QWidget()
         self.create_cards_layout()
@@ -98,55 +101,76 @@ class HistoryPanel(QWidget):
             grid_layout = QGridLayout(self.scroll_widget)
             grid_layout.setSpacing(10)
             grid_layout.setContentsMargins(0, 0, 10, 0)
+            
+            # Calcular altura necessária para 4 cards (2 linhas x 2 colunas)
+            card_height = 70  # Altura de cada card
+            spacing = 10      # Espaçamento entre cards
+            rows_visible = 2  # Número de linhas visíveis
+            
+            # Altura total necessária para mostrar 4 cards
+            total_height = (rows_visible * card_height) + ((rows_visible - 1) * spacing)
+            
+            # Definir altura fixa para o scroll widget mostrar apenas 4 cards
+            self.scroll_widget.setMinimumHeight(total_height + 20)  # +20 para padding
+            
         else:
             # Layout vertical (1 coluna)
             grid_layout = QVBoxLayout(self.scroll_widget)
             grid_layout.setSpacing(10)
             grid_layout.setContentsMargins(0, 0, 10, 0)
+            
+            # Para 1 coluna, permitir altura automática
+            self.scroll_widget.setMinimumHeight(0)
 
-        # Dados de exemplo
+        # Dados de exemplo (mais itens para testar o scroll)
         example_files = [
             {
-                "title": "asdasdasdasdasdasd",
-                "format": "MP4 - 1080P",
-                "time": "01:00",
-                "size": "450Mb"
-            },
-                        {
-                "title": "asdasdasdasdasdasd",
-                "format": "MP4 - 1080P",
-                "time": "01:00",
-                "size": "450Mb"
-            },
-                        {
-                "title": "asdasdasdasdasdasd",
-                "format": "MP4 - 1080P",
-                "time": "01:00",
-                "size": "450Mb"
-            },
-                        {
-                "title": "asdasdasdasdasdasd",
+                "title": "Video 1",
                 "format": "MP4 - 1080P",
                 "time": "01:00",
                 "size": "450Mb"
             },
             {
-                "title": "Another Video File",
-                "format": "MP3 - 320kbps", 
-                "time": "03:45",
-                "size": "8.5Mb"
-            },
-            {
-                "title": "Tutorial Video",
+                "title": "Video 2",
                 "format": "MP4 - 720P",
-                "time": "12:30", 
-                "size": "256Mb"
+                "time": "02:30",
+                "size": "320Mb"
             },
             {
-                "title": "Music Track",
-                "format": "MP3 - 256kbps",
+                "title": "Video 3",
+                "format": "MP4 - 1080P",
+                "time": "03:45",
+                "size": "680Mb"
+            },
+            {
+                "title": "Video 4",
+                "format": "MP4 - 720P",
+                "time": "01:15",
+                "size": "280Mb"
+            },
+            {
+                "title": "Video 5",
+                "format": "MP4 - 1080P",
                 "time": "04:20",
-                "size": "6.2Mb"
+                "size": "720Mb"
+            },
+            {
+                "title": "Video 6",
+                "format": "MP4 - 720P",
+                "time": "02:10",
+                "size": "340Mb"
+            },
+            {
+                "title": "Video 7",
+                "format": "MP4 - 1080P",
+                "time": "05:30",
+                "size": "890Mb"
+            },
+            {
+                "title": "Video 8",
+                "format": "MP4 - 720P",
+                "time": "01:45",
+                "size": "260Mb"
             }
         ]
 
