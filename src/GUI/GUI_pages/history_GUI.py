@@ -2,10 +2,14 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QScrollArea, QGridLayout
 )
 from PySide6.QtGui import QIcon, QPixmap
-from PySide6.QtCore import Qt
-from src.GUI.style.history_STY import HistoryStyleSheet
+from PySide6.QtCore import Qt, Signal,QEasingCurve,QPropertyAnimation
+from src.GUI.style.GUI_style.history_STY import HistoryStyleSheet
 
 class HistoryPanel(QWidget):
+    history_expanded = Signal()
+    history_collapsed = Signal()
+
+
     def __init__(self):
         super().__init__()
         self.is_two_columns = True  # Controla se exibe em 1 ou 2 colunas
@@ -23,7 +27,7 @@ class HistoryPanel(QWidget):
         
         # Conteúdo do histórico (inicializar como oculto)
         self.history_content = self.create_history_content()
-        self.history_content.setFixedHeight(500)
+        # Não definimos altura fixa aqui, para permitir que ele se expanda
         self.history_content.hide()  # Começa oculto
         
         panel_layout.addWidget(self.history_content)
@@ -275,13 +279,40 @@ class HistoryPanel(QWidget):
         self.is_two_columns = not self.is_two_columns
         self.create_cards_layout()
     
-    def toggle_history(self):
+    def toggle_history(self):   
         if self.history_content.isVisible():
+            # Esconder o histórico
             self.history_content.hide()
-            down_icon = QIcon("images/icons/up_icon.png")
+            # Alterar ícone para seta para baixo (indicando expandir)
+            down_icon = QIcon("images/icons/down_icon.png")
             self.toggle_btn.setIcon(down_icon)
+            
+            # Emitir sinal que o histórico foi recolhido
+            self.history_collapsed.emit()
         else:
+            # Mostrar o histórico expandido
+            main_app = self
+            while main_app.parent() is not None:
+                main_app = main_app.parent()
+            
+            # Calcular altura disponível subtraindo apenas a altura da barra de título
+            title_bar_height = 30  # Altura da barra de título
+            
+            # Calcular altura disponível (altura total - barra de título - altura do header_bar)
+            # Subtrai a altura da barra de título (navbar) para não sobrepô-la
+            available_height = main_app.height() - title_bar_height - self.header_bar.height()
+            
+            # Definir altura do conteúdo para preencher todo o espaço disponível abaixo do navbar
+            self.history_content.setFixedHeight(available_height)
+            
+            # Mostrar o conteúdo
             self.history_content.show()
-            up_icon = QIcon("images/icons/down_icon.png")
-
+            
+            # Alterar ícone para seta para cima (indicando recolher)
+            up_icon = QIcon("images/icons/up_icon.png")
             self.toggle_btn.setIcon(up_icon)
+            
+            # Não usamos raise_() para não sobrepor o navbar
+            
+            # Emitir sinal que o histórico foi expandido
+            self.history_expanded.emit()

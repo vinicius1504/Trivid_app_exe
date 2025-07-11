@@ -10,7 +10,7 @@ import sys
 from src.GUI.GUI_pages.download_GUI import MainWindow as DownloadWindow
 from src.GUI.GUI_pages.history_GUI import HistoryPanel
 from src.core.detector_link import detect_platform, is_valid_url
-from src.GUI.style.home_STY import HomeStyleSheet
+from src.GUI.style.GUI_style.home_STY import HomeStyleSheet
 
 
 
@@ -36,12 +36,17 @@ class MediaDownloaderPro(QWidget):
         main_layout.setSpacing(0)
         self.title_bar = self.create_title_bar()
         main_layout.addWidget(self.title_bar)
+        
         # Layout original
         self.body_widget = QWidget()
         self.body_layout = QVBoxLayout(self.body_widget)
         self.body_layout.setContentsMargins(0, 0, 0, 0)
         self.setup_ui()
         main_layout.addWidget(self.body_widget)
+        
+        # Conecta os sinais após inicializar os componentes
+        self.history_panel.history_expanded.connect(self.on_history_expanded)
+        self.history_panel.history_collapsed.connect(self.on_history_collapsed)
 
     # Cria barra de título personalizada com botões minimizar/maximizar/fechar
     def create_title_bar(self): 
@@ -288,9 +293,12 @@ class MediaDownloaderPro(QWidget):
         self.download_window = DownloadWindow(link)  # Passe o link aqui
         self.download_window.show()
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MediaDownloaderPro()
-    window.show()
-    sys.exit(app.exec())
+    def on_history_expanded(self):
+        # Esconder os tabs quando o histórico é expandido
+        self.tabs.hide()
+        
+        # Não precisamos usar raise_() aqui para não sobrepor o navbar
+    
+    def on_history_collapsed(self):
+        # Mostrar os tabs novamente quando o histórico é recolhido
+        self.tabs.show()

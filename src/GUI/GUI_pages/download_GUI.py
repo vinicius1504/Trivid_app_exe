@@ -12,7 +12,7 @@ from pytubefix import YouTube
 from src.core.downloders.youtube_downloader import baixar_video_audio_mesclar, baixar_audio, baixar_thumbnail
 from src.core.downloders.twitch_downloader import baixar_video_twitch, baixar_audio_twitch, baixar_thumbnail_twitch, obter_info_twitch
 from src.core.detector_link import get_platform_info
-from src.GUI.style.download_STY import StyleSheet
+from src.GUI.style.GUI_style.download_STY import StyleSheet
 
 class MainWindow(QMainWindow):
 

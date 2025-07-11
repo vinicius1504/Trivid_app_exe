@@ -63,8 +63,8 @@ class HistoryStyleSheet:
                 background-color: {HistoryStyleSheet.WHITE_COLOR};  /* Fundo branco */
                 border-bottom-left-radius: 10px;   /* Borda arredondada inferior esquerda */
                 border-bottom-right-radius: 10px;  /* Borda arredondada inferior direita */
-                height: 250px;            /* Altura total do container */
-                border: 1px solid black;  /* Borda cinza clara */
+                border: 1px solid {HistoryStyleSheet.BORDER_COLOR};  /* Borda cinza clara */
+                z-index: 100;             /* Garantir que fique sobre outros elementos */
             }}
         """
     
